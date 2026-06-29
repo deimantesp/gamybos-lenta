@@ -246,7 +246,8 @@ function buildStats(periodData, allData) {
       if (r.m3 >= CONFIG.target_m3) streak++;
       else break;
     }
-    return { shift: s, name: s + ' pamaina', tot, cnt, avg, gasEff, streak };
+    const waste = +rows.reduce((a, b) => a + b.waste, 0).toFixed(1);
+    return { shift: s, name: s + ' pamaina', tot, cnt, avg, gasEff, streak, waste };
   });
 
   raw.sort((a, b) => b.tot - a.tot);
@@ -282,6 +283,10 @@ function renderCards(stats, containerId) {
         <div class="stat-row">
           <span>Dujų efekt.</span>
           <span class="stat-val">${s.gasEff} m³/100m³</span>
+        </div>
+        <div class="stat-row">
+          <span>Atliekos</span>
+          <span class="stat-val">${s.waste} m³</span>
         </div>
         ${gapRow}
         <div class="stat-row">
@@ -422,7 +427,8 @@ async function loadAndRender() {
     const rows = text.trim().split('\n');
     const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
 
-    const M3_COLS = ['m3 extra', 'm3 medium', 'm3 premium', 'm3 silos'];
+    const M3_COLS    = ['m3 extra', 'm3 medium', 'm3 premium', 'm3 silos'];
+    const WASTE_COLS = ['fines', 'krit'];
 
     const data = rows.slice(1)
       .filter(r => r.trim())
@@ -431,15 +437,16 @@ async function loadAndRender() {
         const o = {};
         headers.forEach((h, i) => { o[h] = (vals[i] || '').trim(); });
 
-        // Sumuojami visi produktų m3 stulpeliai; jei nėra — naudojamas m3
         const m3sum = M3_COLS.reduce((s, k) => s + (parseFloat(o[k]) || 0), 0);
-        const m3 = m3sum > 0 ? m3sum : (parseFloat(o.m3) || 0);
+        const m3    = m3sum > 0 ? m3sum : (parseFloat(o.m3) || 0);
+        const waste = WASTE_COLS.reduce((s, k) => s + (parseFloat(o[k]) || 0), 0);
 
         return {
           date:  o.date  || '',
           shift: parseInt(o.shift) || 0,
           type:  o.type  || '',
           m3,
+          waste,
           gas:   parseFloat(o.gas) || 0,
           kwh:   parseFloat(o.kwh) || 0,
           raw:   parseFloat(o.raw) || 0,
