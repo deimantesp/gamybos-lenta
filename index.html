@@ -141,16 +141,32 @@ body {
   vertical-align: middle;
 }
 .chart-wrap { position: relative; height: 240px; }
-.footer-note {
+.status-bar {
   text-align: center;
   font-size: 13px;
   color: #c7c7cc;
   margin-top: 1rem;
   padding-bottom: 0.5rem;
 }
+.status-bar.error { color: #C0392B; }
+#loading-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(242,242,247,0.85);
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 700;
+  color: #6e6e73;
+  z-index: 99;
+}
+#loading-overlay.visible { display: flex; }
 </style>
 </head>
 <body>
+
+<div id="loading-overlay">Kraunami duomenys…</div>
 
 <div class="page-header">
   <div>
@@ -165,31 +181,32 @@ body {
 </div>
 
 <div class="main-grid">
-
   <div class="section">
     <h2 class="section-title" id="cycle-title">8 dienų ciklas</h2>
     <div class="rank-grid" id="cycle-cards"></div>
     <div class="chart-legend" id="cycle-legend"></div>
-    <div class="chart-wrap">
-      <canvas id="cycle-chart"></canvas>
-    </div>
+    <div class="chart-wrap"><canvas id="cycle-chart"></canvas></div>
   </div>
-
   <div class="section">
     <h2 class="section-title" id="monthly-title">Mėnesinis vaizdas</h2>
     <div class="rank-grid" id="monthly-cards"></div>
     <div class="chart-legend" id="monthly-legend"></div>
-    <div class="chart-wrap">
-      <canvas id="monthly-chart"></canvas>
-    </div>
+    <div class="chart-wrap"><canvas id="monthly-chart"></canvas></div>
   </div>
-
 </div>
 
-<p class="footer-note" id="footer-note"></p>
+<p class="status-bar" id="status-bar"></p>
 
-<script src="data.js"></script>
 <script>
+const CONFIG = {
+  target_m3: 120,
+  gold_m3: 135,
+  cycle_days: 8,
+  shifts_per_day: 2,
+};
+
+const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTRGeNdfu4A-DOF4jONXpTCKaSkE1uUpLXa94HHkNPw1mhIoWHNcKwhvoSL22Nh48DEV2DDMZ1KXprI/pub?output=csv';
+
 const MONTH_NAMES = [
   'Sausis','Vasaris','Kovas','Balandis','Gegužė','Birželis',
   'Liepa','Rugpjūtis','Rugsėjis','Spalis','Lapkritis','Gruodis'
@@ -215,8 +232,8 @@ function filterRange(data, from, to) {
 function buildStats(periodData, allData) {
   const raw = [1, 2, 3, 4].map(s => {
     const rows = periodData.filter(d => d.shift === s);
-    const tot  = rows.reduce((a, b) => a + b.m3,  0);
-    const gas  = rows.reduce((a, b) => a + b.gas,  0);
+    const tot  = rows.reduce((a, b) => a + b.m3, 0);
+    const gas  = rows.reduce((a, b) => a + b.gas, 0);
     const cnt  = rows.length;
     const avg  = cnt ? +(tot / cnt).toFixed(1) : 0;
     const gasEff = gas ? +(tot / gas * 100).toFixed(1) : 0;
@@ -277,21 +294,17 @@ function renderCards(stats, containerId) {
 
 function renderShiftBarsChart(periodData, canvasId, legendId, showFuture) {
   const now = new Date();
-
   const sorted = [...periodData].sort((a, b) =>
     a.date.localeCompare(b.date) || a.shift - b.shift
   );
 
-  const labels   = [];
-  const values   = [];
-  const bgColors = [];
-  const bdColors = [];
+  const labels = [], values = [], bgColors = [], bdColors = [];
 
   sorted.forEach(e => {
     const dt = new Date(e.date + 'T12:00:00');
     const dd = String(dt.getDate()).padStart(2, '0');
     const mm = String(dt.getMonth() + 1).padStart(2, '0');
-    labels.push([dd + '.' + mm, 'P' + e.shift + ' ' + (e.type || '')]);
+    labels.push([dd + '.' + mm, 'P' + e.shift + (e.type ? ' ' + e.type : '')]);
     values.push(e.m3);
     bgColors.push(SHIFT_COLORS[e.shift - 1].bg);
     bdColors.push(SHIFT_COLORS[e.shift - 1].border);
@@ -324,7 +337,6 @@ function renderShiftBarsChart(periodData, canvasId, legendId, showFuture) {
       labels,
       datasets: [
         {
-          label: 'Pagaminta m³',
           data: values,
           backgroundColor: bgColors,
           borderColor: bdColors,
@@ -332,7 +344,6 @@ function renderShiftBarsChart(periodData, canvasId, legendId, showFuture) {
           borderRadius: 3,
         },
         {
-          label: 'Tikslas',
           data: Array(labels.length).fill(CONFIG.target_m3),
           type: 'line',
           borderColor: '#E24B4A',
@@ -368,39 +379,77 @@ function renderShiftBarsChart(periodData, canvasId, legendId, showFuture) {
   });
 }
 
-function init() {
+function init(data) {
   const now      = new Date();
   const todayStr = toDateStr(now);
-
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
   document.getElementById('month-display').textContent = now.getDate() + ' / ' + daysInMonth;
   document.getElementById('day-display').textContent   = MONTH_NAMES[now.getMonth()] + ' ' + now.getFullYear();
 
+  // 8 dienų ciklas
   const cycleStart    = new Date(now);
   cycleStart.setDate(cycleStart.getDate() - (CONFIG.cycle_days - 1));
   const cycleStartStr = toDateStr(cycleStart);
-  const cycleData     = filterRange(DATA, cycleStartStr, todayStr);
-  const cycleStats    = buildStats(cycleData, DATA);
+  const cycleData     = filterRange(data, cycleStartStr, todayStr);
+  const cycleStats    = buildStats(cycleData, data);
   const fmtDate = d => d.toLocaleDateString('lt-LT', { month: 'short', day: 'numeric' });
   document.getElementById('cycle-title').textContent =
     fmtDate(cycleStart) + ' – ' + fmtDate(now) + ' · 8 dienų ciklas';
   renderCards(cycleStats, 'cycle-cards');
   renderShiftBarsChart(cycleData, 'cycle-chart', 'cycle-legend', false);
 
+  // Mėnesinis vaizdas
   const monthStart   = toDateStr(new Date(now.getFullYear(), now.getMonth(), 1));
-  const monthlyData  = filterRange(DATA, monthStart, todayStr);
-  const monthlyStats = buildStats(monthlyData, DATA);
+  const monthlyData  = filterRange(data, monthStart, todayStr);
+  const monthlyStats = buildStats(monthlyData, data);
   document.getElementById('monthly-title').textContent =
     MONTH_NAMES[now.getMonth()] + ' ' + now.getFullYear() + ' — mėnesinis vaizdas';
   renderCards(monthlyStats, 'monthly-cards');
   renderShiftBarsChart(monthlyData, 'monthly-chart', 'monthly-legend', true);
 
-  document.getElementById('footer-note').textContent =
+  document.getElementById('status-bar').textContent =
     'Atnaujinta: ' + now.toLocaleString('lt-LT', { dateStyle: 'short', timeStyle: 'short' }) +
     ' · Puslapis atsinaujina kas 5 min.';
 }
 
-init();
+async function loadAndRender() {
+  document.getElementById('loading-overlay').classList.add('visible');
+  try {
+    const resp = await fetch(CSV_URL + '&t=' + Date.now());
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const text = await resp.text();
+    const rows = text.trim().split('\n');
+    const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
+
+    const data = rows.slice(1)
+      .filter(r => r.trim())
+      .map(row => {
+        const vals = row.split(',');
+        const o = {};
+        headers.forEach((h, i) => { o[h] = (vals[i] || '').trim(); });
+        return {
+          date:  o.date  || '',
+          shift: parseInt(o.shift) || 0,
+          type:  o.type  || '',
+          m3:    parseFloat(o.m3)  || 0,
+          gas:   parseFloat(o.gas) || 0,
+          kwh:   parseFloat(o.kwh) || 0,
+          raw:   parseFloat(o.raw) || 0,
+        };
+      })
+      .filter(d => d.date && d.shift > 0);
+
+    init(data);
+  } catch (e) {
+    const bar = document.getElementById('status-bar');
+    bar.textContent = 'Klaida kraunant duomenis iš Google Sheets. Puslapis bandys atsinaujinti po 5 min.';
+    bar.classList.add('error');
+  }
+  document.getElementById('loading-overlay').classList.remove('visible');
+}
+
+loadAndRender();
 </script>
 </body>
 </html>
