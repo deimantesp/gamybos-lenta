@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="300">
+<title>Pamainos lenktynės</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background: #f2f2f7;
+  color: #1c1c1e;
+  padding: 1.25rem 1.5rem;
+  min-height: 100vh;
+}
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+  gap: 1rem;
+}
+.page-title-sub { font-size: 15px; color: #6e6e73; margin-bottom: 4px; font-weight: 600; }
+.page-title { font-size: 34px; font-weight: 800; letter-spacing: -0.5px; }
+.page-meta { font-size: 15px; color: #6e6e73; margin-top: 5px; }
+.month-box {
+  background: white;
+  border-radius: 12px;
+  padding: 10px 18px;
+  text-align: right;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.month-num { font-size: 26px; font-weight: 800; }
+.month-label { font-size: 13px; color: #6e6e73; margin-top: 2px; }
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+@media (max-width: 900px) {
+  .main-grid { grid-template-columns: 1fr; }
+}
+.section {
+  background: white;
+  border-radius: 16px;
+  padding: 1.25rem;
+}
+.section-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #3c3c43;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 0.5px solid #e5e5ea;
+}
+.rank-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+  margin-bottom: 1rem;
+}
+@media (max-width: 900px) {
+  .rank-grid { grid-template-columns: repeat(2, 1fr); }
+}
+.rank-card {
+  background: #f2f2f7;
+  border-radius: 10px;
+  padding: 0.75rem;
+  border-top: 3px solid;
+}
+.rank-card[data-rank="1"] { border-color: #F5A623; }
+.rank-card[data-rank="2"] { border-color: #AEADB3; }
+.rank-card[data-rank="3"] { border-color: #E07055; }
+.rank-card[data-rank="4"] { border-color: #5B9BD5; }
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.rank-badge {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 20px;
+  display: inline-block;
+  font-family: 'Montserrat', sans-serif;
+}
+.rank-badge[data-rank="1"] { background: #FEF3DA; color: #7A4A00; }
+.rank-badge[data-rank="2"] { background: #EFEFEF; color: #555; }
+.rank-badge[data-rank="3"] { background: #FBE8E4; color: #7A2010; }
+.rank-badge[data-rank="4"] { background: #E3EEF8; color: #1A4F80; }
+.card-medal { font-size: 30px; line-height: 1; }
+.card-name { font-size: 17px; font-weight: 700; margin: 7px 0 2px; }
+.card-total {
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 1;
+  color: #1c1c1e;
+  letter-spacing: -1.5px;
+}
+.card-total[data-rank="1"] { color: #C47A00; }
+.card-unit { font-size: 12px; color: #8e8e93; margin-bottom: 8px; }
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #8e8e93;
+  background: white;
+  border-radius: 6px;
+  padding: 4px 7px;
+  margin-top: 4px;
+}
+.stat-val { font-weight: 700; font-size: 13px; color: #1c1c1e; }
+.stat-val.good { color: #1A7A4A; }
+.stat-val.bad  { color: #C0392B; }
+.stat-val.gold { color: #C47A00; }
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #8e8e93;
+  align-items: center;
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-right: 3px;
+  vertical-align: middle;
+}
+.chart-wrap { position: relative; height: 240px; }
+.footer-note {
+  text-align: center;
+  font-size: 13px;
+  color: #c7c7cc;
+  margin-top: 1rem;
+  padding-bottom: 0.5rem;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div>
+    <p class="page-title-sub">Pustas perlitas</p>
+    <h1 class="page-title">Pamainos lenktynės</h1>
+    <p class="page-meta">Tikslas: <strong>120 m³</strong> / pamaina &nbsp;·&nbsp; Aukso zona: <strong>135+ m³</strong></p>
+  </div>
+  <div class="month-box">
+    <div class="month-num" id="month-display"></div>
+    <div class="month-label" id="day-display"></div>
+  </div>
+</div>
+
+<div class="main-grid">
+
+  <div class="section">
+    <h2 class="section-title" id="cycle-title">8 dienų ciklas</h2>
+    <div class="rank-grid" id="cycle-cards"></div>
+    <div class="chart-legend" id="cycle-legend"></div>
+    <div class="chart-wrap">
+      <canvas id="cycle-chart"></canvas>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title" id="monthly-title">Mėnesinis vaizdas</h2>
+    <div class="rank-grid" id="monthly-cards"></div>
+    <div class="chart-legend" id="monthly-legend"></div>
+    <div class="chart-wrap">
+      <canvas id="monthly-chart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<p class="footer-note" id="footer-note"></p>
+
+<script src="data.js"></script>
+<script>
+const MONTH_NAMES = [
+  'Sausis','Vasaris','Kovas','Balandis','Gegužė','Birželis',
+  'Liepa','Rugpjūtis','Rugsėjis','Spalis','Lapkritis','Gruodis'
+];
+
+const SHIFT_COLORS = [
+  { bg: 'rgba(245,166,35,0.85)',  border: '#C47A00' },
+  { bg: 'rgba(80,170,130,0.85)',  border: '#1E7A50' },
+  { bg: 'rgba(224,112,85,0.85)',  border: '#B84020' },
+  { bg: 'rgba(91,155,213,0.85)',  border: '#2A6FAD' },
+];
+
+function toDateStr(d) {
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+
+function filterRange(data, from, to) {
+  return data.filter(d => d.date >= from && d.date <= to);
+}
+
+function buildStats(periodData, allData) {
+  const raw = [1, 2, 3, 4].map(s => {
+    const rows = periodData.filter(d => d.shift === s);
+    const tot  = rows.reduce((a, b) => a + b.m3,  0);
+    const gas  = rows.reduce((a, b) => a + b.gas,  0);
+    const cnt  = rows.length;
+    const avg  = cnt ? +(tot / cnt).toFixed(1) : 0;
+    const gasEff = gas ? +(tot / gas * 100).toFixed(1) : 0;
+
+    const allRows = allData
+      .filter(d => d.shift === s)
+      .sort((a, b) => b.date.localeCompare(a.date));
+    let streak = 0;
+    for (const r of allRows) {
+      if (r.m3 >= CONFIG.target_m3) streak++;
+      else break;
+    }
+    return { shift: s, name: s + ' pamaina', tot, cnt, avg, gasEff, streak };
+  });
+
+  raw.sort((a, b) => b.tot - a.tot);
+  raw.forEach((r, i) => {
+    r.rank = i + 1;
+    r.gapToNext = i > 0 ? raw[i - 1].tot - r.tot : 0;
+  });
+  return raw;
+}
+
+function renderCards(stats, containerId) {
+  document.getElementById(containerId).innerHTML = stats.map(s => {
+    const avgClass    = s.avg >= CONFIG.target_m3 ? 'good' : 'bad';
+    const streakClass = s.streak >= 5 ? 'gold' : (s.streak >= 3 ? 'good' : '');
+    const medalHtml   = s.rank === 1 ? '<span class="card-medal">🥇</span>' : '';
+    const gapRow = s.rank > 1
+      ? `<div class="stat-row"><span>Trūksta iki ${s.rank - 1} v.</span><span class="stat-val bad">−${s.gapToNext} m³</span></div>`
+      : '';
+    return `
+      <div class="rank-card" data-rank="${s.rank}">
+        <div class="card-top">
+          <span class="rank-badge" data-rank="${s.rank}">${s.rank} vieta</span>
+          ${medalHtml}
+        </div>
+        <p class="card-name">${s.name}</p>
+        <p class="card-total" data-rank="${s.rank}">${s.tot.toLocaleString('lt-LT')}</p>
+        <p class="card-unit">m³ šiuo laikotarpiu</p>
+        <div class="stat-row">
+          <span>Vid. / pamainai</span>
+          <span class="stat-val ${avgClass}">${s.avg} m³</span>
+        </div>
+        <div class="stat-row">
+          <span>Dujų efekt.</span>
+          <span class="stat-val">${s.gasEff} m³/100m³</span>
+        </div>
+        ${gapRow}
+        <div class="stat-row">
+          <span>Serija</span>
+          <span class="stat-val ${streakClass}">${s.streak} pam.</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderShiftBarsChart(periodData, canvasId, legendId, showFuture) {
+  const now = new Date();
+
+  const sorted = [...periodData].sort((a, b) =>
+    a.date.localeCompare(b.date) || a.shift - b.shift
+  );
+
+  const labels   = [];
+  const values   = [];
+  const bgColors = [];
+  const bdColors = [];
+
+  sorted.forEach(e => {
+    const dt = new Date(e.date + 'T12:00:00');
+    const dd = String(dt.getDate()).padStart(2, '0');
+    const mm = String(dt.getMonth() + 1).padStart(2, '0');
+    labels.push([dd + '.' + mm, 'P' + e.shift]);
+    values.push(e.m3);
+    bgColors.push(SHIFT_COLORS[e.shift - 1].bg);
+    bdColors.push(SHIFT_COLORS[e.shift - 1].border);
+  });
+
+  if (showFuture) {
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    for (let d = now.getDate() + 1; d <= daysInMonth; d++) {
+      const dd = String(d).padStart(2, '0');
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      for (let s = 0; s < CONFIG.shifts_per_day; s++) {
+        labels.push([dd + '.' + mm, s === 0 ? 'D' : 'N']);
+        values.push(null);
+        bgColors.push('transparent');
+        bdColors.push('transparent');
+      }
+    }
+  }
+
+  document.getElementById(legendId).innerHTML =
+    [1, 2, 3, 4].map((s, i) =>
+      `<span><span class="legend-dot" style="background:${SHIFT_COLORS[i].bg}"></span>${s} pam.</span>`
+    ).join('') +
+    `<span style="margin-left:6px;padding-left:8px;border-left:1px solid #e5e5ea;display:flex;align-items:center;gap:4px">` +
+    `<span style="width:18px;border-top:2px dashed #E24B4A;display:inline-block"></span>Tikslas</span>`;
+
+  new Chart(document.getElementById(canvasId), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Pagaminta m³',
+          data: values,
+          backgroundColor: bgColors,
+          borderColor: bdColors,
+          borderWidth: 1,
+          borderRadius: 3,
+        },
+        {
+          label: 'Tikslas',
+          data: Array(labels.length).fill(CONFIG.target_m3),
+          type: 'line',
+          borderColor: '#E24B4A',
+          borderDash: [4, 4],
+          borderWidth: 1.5,
+          pointRadius: 0,
+          fill: false,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          ticks: {
+            font: { size: 9, family: "'Montserrat', sans-serif" },
+            autoSkip: false,
+            maxRotation: 90,
+            minRotation: 90,
+          },
+          grid: { display: false },
+        },
+        y: {
+          min: 0,
+          suggestedMax: 150,
+          ticks: { font: { size: 11, family: "'Montserrat', sans-serif" } },
+          grid: { color: 'rgba(0,0,0,0.04)' },
+        }
+      }
+    }
+  });
+}
+
+function init() {
+  const now      = new Date();
+  const todayStr = toDateStr(now);
+
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  document.getElementById('month-display').textContent = now.getDate() + ' / ' + daysInMonth;
+  document.getElementById('day-display').textContent   = MONTH_NAMES[now.getMonth()] + ' ' + now.getFullYear();
+
+  const cycleStart    = new Date(now);
+  cycleStart.setDate(cycleStart.getDate() - (CONFIG.cycle_days - 1));
+  const cycleStartStr = toDateStr(cycleStart);
+  const cycleData     = filterRange(DATA, cycleStartStr, todayStr);
+  const cycleStats    = buildStats(cycleData, DATA);
+  const fmtDate = d => d.toLocaleDateString('lt-LT', { month: 'short', day: 'numeric' });
+  document.getElementById('cycle-title').textContent =
+    fmtDate(cycleStart) + ' – ' + fmtDate(now) + ' · 8 dienų ciklas';
+  renderCards(cycleStats, 'cycle-cards');
+  renderShiftBarsChart(cycleData, 'cycle-chart', 'cycle-legend', false);
+
+  const monthStart   = toDateStr(new Date(now.getFullYear(), now.getMonth(), 1));
+  const monthlyData  = filterRange(DATA, monthStart, todayStr);
+  const monthlyStats = buildStats(monthlyData, DATA);
+  document.getElementById('monthly-title').textContent =
+    MONTH_NAMES[now.getMonth()] + ' ' + now.getFullYear() + ' — mėnesinis vaizdas';
+  renderCards(monthlyStats, 'monthly-cards');
+  renderShiftBarsChart(monthlyData, 'monthly-chart', 'monthly-legend', true);
+
+  document.getElementById('footer-note').textContent =
+    'Atnaujinta: ' + now.toLocaleString('lt-LT', { dateStyle: 'short', timeStyle: 'short' }) +
+    ' · Puslapis atsinaujina kas 5 min.';
+}
+
+init();
+</script>
+</body>
+</html>
