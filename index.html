@@ -454,7 +454,23 @@ async function loadAndRender() {
       })
       .filter(d => d.date && d.shift > 0);
 
-    init(data);
+    // Jei ta pati data+pamaina+tipas turi kelis įrašus (skirtingi Furn) — susumuoti
+    const grouped = {};
+    data.forEach(d => {
+      const key = d.date + '|' + d.shift + '|' + d.type;
+      if (!grouped[key]) {
+        grouped[key] = { ...d };
+      } else {
+        grouped[key].m3    += d.m3;
+        grouped[key].waste += d.waste;
+        grouped[key].gas   += d.gas;
+        grouped[key].kwh   += d.kwh;
+        grouped[key].raw   += d.raw;
+      }
+    });
+    const mergedData = Object.values(grouped);
+
+    init(mergedData);
   } catch (e) {
     const bar = document.getElementById('status-bar');
     bar.textContent = 'Klaida kraunant duomenis iš Google Sheets. Puslapis bandys atsinaujinti po 5 min.';
