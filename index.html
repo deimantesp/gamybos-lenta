@@ -78,6 +78,8 @@ body {
 .rank-card[data-rank="2"] { border-color: #AEADB3; }
 .rank-card[data-rank="3"] { border-color: #E07055; }
 .rank-card[data-rank="4"] { border-color: #5B9BD5; }
+.rank-card[data-onplan="true"]  { background: #e6f4ec; border-color: #1A7A4A; }
+.rank-card[data-onplan="false"] { background: #fce9e7; border-color: #C0392B; }
 .card-top {
   display: flex;
   justify-content: space-between;
@@ -240,14 +242,15 @@ function buildStats(periodData, allData) {
 
 function renderCards(stats, containerId) {
   document.getElementById(containerId).innerHTML = stats.map(s => {
-    const avgClass    = s.avg >= CONFIG.target_m3 ? 'good' : 'bad';
+    const onPlan      = s.avg >= CONFIG.target_m3;
+    const avgClass    = onPlan ? 'good' : 'bad';
     const streakClass = s.streak >= 5 ? 'gold' : (s.streak >= 3 ? 'good' : '');
     const medalHtml   = s.rank === 1 ? '<span class="card-medal">🥇</span>' : '';
     const gapRow = s.rank > 1
       ? `<div class="stat-row"><span>Trūksta iki ${s.rank - 1} v.</span><span class="stat-val bad">−${s.gapToNext} m³</span></div>`
       : '';
     return `
-      <div class="rank-card" data-rank="${s.rank}">
+      <div class="rank-card" data-rank="${s.rank}" data-onplan="${onPlan}">
         <div class="card-top">
           <span class="rank-badge" data-rank="${s.rank}">${s.rank} vieta</span>
           ${medalHtml}
