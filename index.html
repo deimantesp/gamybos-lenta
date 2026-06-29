@@ -291,7 +291,7 @@ function renderShiftBarsChart(periodData, canvasId, legendId, showFuture) {
     const dt = new Date(e.date + 'T12:00:00');
     const dd = String(dt.getDate()).padStart(2, '0');
     const mm = String(dt.getMonth() + 1).padStart(2, '0');
-    labels.push([dd + '.' + mm, 'P' + e.shift]);
+    labels.push([dd + '.' + mm, 'P' + e.shift + ' ' + (e.type || '')]);
     values.push(e.m3);
     bgColors.push(SHIFT_COLORS[e.shift - 1].bg);
     bdColors.push(SHIFT_COLORS[e.shift - 1].border);
