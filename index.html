@@ -422,17 +422,24 @@ async function loadAndRender() {
     const rows = text.trim().split('\n');
     const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
 
+    const M3_COLS = ['m3 extra', 'm3 medium', 'm3 premium', 'm3 silos'];
+
     const data = rows.slice(1)
       .filter(r => r.trim())
       .map(row => {
         const vals = row.split(',');
         const o = {};
         headers.forEach((h, i) => { o[h] = (vals[i] || '').trim(); });
+
+        // Sumuojami visi produktų m3 stulpeliai; jei nėra — naudojamas m3
+        const m3sum = M3_COLS.reduce((s, k) => s + (parseFloat(o[k]) || 0), 0);
+        const m3 = m3sum > 0 ? m3sum : (parseFloat(o.m3) || 0);
+
         return {
           date:  o.date  || '',
           shift: parseInt(o.shift) || 0,
           type:  o.type  || '',
-          m3:    parseFloat(o.m3)  || 0,
+          m3,
           gas:   parseFloat(o.gas) || 0,
           kwh:   parseFloat(o.kwh) || 0,
           raw:   parseFloat(o.raw) || 0,
