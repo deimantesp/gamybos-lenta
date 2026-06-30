@@ -195,6 +195,13 @@ body {
   </div>
 </div>
 
+<div class="section yearly-section" style="margin-top:1.25rem;">
+  <h2 class="section-title" id="yearly-title">Metinis vaizdas</h2>
+  <div class="rank-grid" id="yearly-cards"></div>
+  <div class="chart-legend" id="yearly-legend"></div>
+  <div class="chart-wrap" style="height:260px;"><canvas id="yearly-chart"></canvas></div>
+</div>
+
 <p class="status-bar" id="status-bar"></p>
 
 <script>
@@ -210,6 +217,10 @@ const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTRGeNdfu4A-DOF
 const MONTH_NAMES = [
   'Sausis','Vasaris','Kovas','Balandis','Gegužė','Birželis',
   'Liepa','Rugpjūtis','Rugsėjis','Spalis','Lapkritis','Gruodis'
+];
+const MONTH_SHORT = [
+  'Sau.','Vas.','Kov.','Bal.','Geg.','Bir.',
+  'Lie.','Rug.','Rgs.','Spa.','Lap.','Gru.'
 ];
 
 const SHIFT_COLORS = [
@@ -384,6 +395,65 @@ function renderShiftBarsChart(periodData, canvasId, legendId, showFuture) {
   });
 }
 
+function renderYearlyChart(data, canvasId, legendId) {
+  // Sugruopuoti pagal mėnesį + pamainą, susumuoti m3
+  const groups = {};
+  data.forEach(d => {
+    const key = d.date.substring(0, 7) + '|' + d.shift;
+    if (!groups[key]) groups[key] = { month: d.date.substring(0, 7), shift: d.shift, m3: 0 };
+    groups[key].m3 += d.m3;
+  });
+
+  const entries = Object.values(groups).sort((a, b) =>
+    a.month.localeCompare(b.month) || a.shift - b.shift
+  );
+
+  const labels   = entries.map(e => [MONTH_SHORT[parseInt(e.month.split('-')[1]) - 1], 'P' + e.shift]);
+  const values   = entries.map(e => +e.m3.toFixed(1));
+  const bgColors = entries.map(e => SHIFT_COLORS[e.shift - 1].bg);
+  const bdColors = entries.map(e => SHIFT_COLORS[e.shift - 1].border);
+
+  document.getElementById(legendId).innerHTML =
+    [1, 2, 3, 4].map((s, i) =>
+      `<span><span class="legend-dot" style="background:${SHIFT_COLORS[i].bg}"></span>${s} pam.</span>`
+    ).join('');
+
+  new Chart(document.getElementById(canvasId), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        backgroundColor: bgColors,
+        borderColor: bdColors,
+        borderWidth: 1,
+        borderRadius: 3,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: {
+          ticks: {
+            font: { size: 9, family: "'Montserrat', sans-serif" },
+            autoSkip: false,
+            maxRotation: 90,
+            minRotation: 90,
+          },
+          grid: { display: false },
+        },
+        y: {
+          min: 0,
+          ticks: { font: { size: 11, family: "'Montserrat', sans-serif" } },
+          grid: { color: 'rgba(0,0,0,0.04)' },
+        }
+      }
+    }
+  });
+}
+
 function init(data) {
   const now      = new Date();
   const todayStr = toDateStr(now);
@@ -412,6 +482,15 @@ function init(data) {
     MONTH_NAMES[now.getMonth()] + ' ' + now.getFullYear() + ' — mėnesinis vaizdas';
   renderCards(monthlyStats, 'monthly-cards');
   renderShiftBarsChart(monthlyData, 'monthly-chart', 'monthly-legend', true);
+
+  // Metinis vaizdas
+  const yearStart   = toDateStr(new Date(now.getFullYear(), 0, 1));
+  const yearlyData  = filterRange(data, yearStart, todayStr);
+  const yearlyStats = buildStats(yearlyData, data);
+  document.getElementById('yearly-title').textContent =
+    now.getFullYear() + ' m. — metinis vaizdas';
+  renderCards(yearlyStats, 'yearly-cards');
+  renderYearlyChart(yearlyData, 'yearly-chart', 'yearly-legend');
 
   document.getElementById('status-bar').textContent =
     'Atnaujinta: ' + now.toLocaleString('lt-LT', { dateStyle: 'short', timeStyle: 'short' }) +
