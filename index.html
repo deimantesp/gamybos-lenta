@@ -141,6 +141,32 @@ body {
   vertical-align: middle;
 }
 .chart-wrap { position: relative; height: 240px; }
+.records-banner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+@media (max-width: 900px) { .records-banner { grid-template-columns: 1fr; } }
+.record-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1rem 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  border-left: 6px solid;
+}
+.record-card.rec-max { border-color: #C47A00; }
+.record-card.rec-eco { border-color: #1A7A4A; }
+.record-icon { font-size: 46px; line-height: 1; flex-shrink: 0; }
+.record-body { flex: 1; min-width: 0; }
+.record-label { font-size: 13px; font-weight: 700; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.5px; }
+.record-value { font-size: 40px; font-weight: 900; letter-spacing: -1.5px; line-height: 1.05; margin: 2px 0; }
+.record-card.rec-max .record-value { color: #C47A00; }
+.record-card.rec-eco .record-value { color: #1A7A4A; }
+.record-meta { font-size: 14px; color: #8e8e93; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.record-shift-badge { display: inline-block; font-weight: 700; padding: 2px 10px; border-radius: 20px; font-size: 13px; color: #fff; }
 .status-bar {
   text-align: center;
   font-size: 13px;
@@ -179,6 +205,8 @@ body {
     <div class="month-label" id="day-display"></div>
   </div>
 </div>
+
+<div class="records-banner" id="records-banner"></div>
 
 <div class="main-grid">
   <div class="section">
@@ -439,9 +467,74 @@ function renderYearlyChart(data, canvasId, legendId) {
   });
 }
 
+/* ── Rekordai (per visą laikotarpį) ── */
+function computeRecords(data) {
+  // Sujungti pagal data+pamaina (per visus tipus)
+  const byShiftDay = {};
+  data.forEach(d => {
+    const key = d.date + '|' + d.shift;
+    if (!byShiftDay[key]) byShiftDay[key] = { date: d.date, shift: d.shift, m3: 0, gas: 0 };
+    byShiftDay[key].m3  += d.m3;
+    byShiftDay[key].gas += d.gas;
+  });
+  const arr = Object.values(byShiftDay);
+
+  // Daugiausiai m³ per vieną pamainą
+  let maxRec = null;
+  arr.forEach(r => { if (!maxRec || r.m3 > maxRec.m3) maxRec = r; });
+
+  // Ekonomiškiausia: didžiausias m³/dujos (tik pilnesnės pamainos, gas>0)
+  let ecoRec = null;
+  arr.forEach(r => {
+    if (r.gas > 0 && r.m3 >= 60) {
+      const eff = +(r.m3 / r.gas * 100).toFixed(1);
+      if (!ecoRec || eff > ecoRec.eff) ecoRec = { ...r, eff };
+    }
+  });
+
+  return { maxRec, ecoRec };
+}
+
+function renderRecords(data) {
+  const { maxRec, ecoRec } = computeRecords(data);
+  const fmtDate = ds => {
+    const p = ds.split('-');
+    return (+p[2]) + ' ' + MONTH_SHORT[(+p[1]) - 1] + ' ' + p[0];
+  };
+  const shiftBadge = s => {
+    const c = SHIFT_COLORS[s - 1] || SHIFT_COLORS[0];
+    return `<span class="record-shift-badge" style="background:${c.border}">${s} pamaina</span>`;
+  };
+
+  let html = '';
+  if (maxRec) {
+    html += `<div class="record-card rec-max">
+      <div class="record-icon">🏆</div>
+      <div class="record-body">
+        <div class="record-label">Daugiausiai per pamainą</div>
+        <div class="record-value">${maxRec.m3.toLocaleString('lt-LT')} m³</div>
+        <div class="record-meta">${shiftBadge(maxRec.shift)} · ${fmtDate(maxRec.date)}</div>
+      </div>
+    </div>`;
+  }
+  if (ecoRec) {
+    html += `<div class="record-card rec-eco">
+      <div class="record-icon">💚</div>
+      <div class="record-body">
+        <div class="record-label">Ekonomiškiausia pamaina</div>
+        <div class="record-value">${ecoRec.eff} <span style="font-size:20px">m³/100m³</span></div>
+        <div class="record-meta">${shiftBadge(ecoRec.shift)} · ${fmtDate(ecoRec.date)} · ${ecoRec.m3.toLocaleString('lt-LT')} m³</div>
+      </div>
+    </div>`;
+  }
+  document.getElementById('records-banner').innerHTML = html;
+}
+
 function init(data) {
   const now      = new Date();
   const todayStr = toDateStr(now);
+
+  renderRecords(data);
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 
   document.getElementById('month-display').textContent = now.getDate() + ' / ' + daysInMonth;
