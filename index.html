@@ -396,22 +396,19 @@ function renderShiftBarsChart(periodData, canvasId, legendId, showFuture) {
 }
 
 function renderYearlyChart(data, canvasId, legendId) {
-  // Sugruopuoti pagal mėnesį + pamainą, susumuoti m3
-  const groups = {};
-  data.forEach(d => {
-    const key = d.date.substring(0, 7) + '|' + d.shift;
-    if (!groups[key]) groups[key] = { month: d.date.substring(0, 7), shift: d.shift, m3: 0 };
-    groups[key].m3 += d.m3;
-  });
+  const months = [...new Set(data.map(d => d.date.substring(0, 7)))].sort();
+  const labels  = months.map(m => MONTH_SHORT[parseInt(m.split('-')[1]) - 1]);
 
-  const entries = Object.values(groups).sort((a, b) =>
-    a.month.localeCompare(b.month) || a.shift - b.shift
-  );
-
-  const labels   = entries.map(e => [MONTH_SHORT[parseInt(e.month.split('-')[1]) - 1], 'P' + e.shift]);
-  const values   = entries.map(e => +e.m3.toFixed(1));
-  const bgColors = entries.map(e => SHIFT_COLORS[e.shift - 1].bg);
-  const bdColors = entries.map(e => SHIFT_COLORS[e.shift - 1].border);
+  const datasets = [1, 2, 3, 4].map(s => ({
+    label: s + ' pamaina',
+    data: months.map(month => {
+      const rows = data.filter(d => d.shift === s && d.date.startsWith(month));
+      return +rows.reduce((a, b) => a + b.m3, 0).toFixed(1);
+    }),
+    backgroundColor: SHIFT_COLORS[s - 1].bg,
+    borderColor: SHIFT_COLORS[s - 1].border,
+    borderWidth: 1,
+  }));
 
   document.getElementById(legendId).innerHTML =
     [1, 2, 3, 4].map((s, i) =>
@@ -420,31 +417,19 @@ function renderYearlyChart(data, canvasId, legendId) {
 
   new Chart(document.getElementById(canvasId), {
     type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        data: values,
-        backgroundColor: bgColors,
-        borderColor: bdColors,
-        borderWidth: 1,
-        borderRadius: 3,
-      }]
-    },
+    data: { labels, datasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
         x: {
-          ticks: {
-            font: { size: 9, family: "'Montserrat', sans-serif" },
-            autoSkip: false,
-            maxRotation: 90,
-            minRotation: 90,
-          },
+          stacked: true,
+          ticks: { font: { size: 12, family: "'Montserrat', sans-serif" } },
           grid: { display: false },
         },
         y: {
+          stacked: true,
           min: 0,
           ticks: { font: { size: 11, family: "'Montserrat', sans-serif" } },
           grid: { color: 'rgba(0,0,0,0.04)' },
