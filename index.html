@@ -59,6 +59,9 @@ body {
   padding-bottom: 0.75rem;
   border-bottom: 0.5px solid #e5e5ea;
 }
+.mv-nav { background: #f2f2f7; border: none; border-radius: 8px; width: 34px; height: 34px; font-size: 20px; font-weight: 700; cursor: pointer; color: #3c3c43; line-height: 1; }
+.mv-nav:hover { background: #e5e5ea; }
+.mv-sel { font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 800; color: #0A2342; background: #f2f2f7; border: 1px solid #e5e5ea; border-radius: 8px; padding: 6px 10px; cursor: pointer; outline: none; }
 .rank-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -208,19 +211,24 @@ body {
 
 <div class="records-banner" id="records-banner"></div>
 
-<div class="main-grid">
-  <div class="section">
-    <h2 class="section-title" id="cycle-title">8 dienų ciklas</h2>
-    <div class="rank-grid" id="cycle-cards"></div>
-    <div class="chart-legend" id="cycle-legend"></div>
-    <div class="chart-wrap"><canvas id="cycle-chart"></canvas></div>
+<div class="section">
+  <div class="section-title" style="display:flex;align-items:center;gap:0.55rem;flex-wrap:wrap">
+    <button class="mv-nav" onclick="navMonth(-1)">‹</button>
+    <select id="m-month-sel" class="mv-sel" onchange="onMonthSel()">
+      <option value="0">Sausis</option><option value="1">Vasaris</option>
+      <option value="2">Kovas</option><option value="3">Balandis</option>
+      <option value="4">Gegužė</option><option value="5">Birželis</option>
+      <option value="6">Liepa</option><option value="7">Rugpjūtis</option>
+      <option value="8">Rugsėjis</option><option value="9">Spalis</option>
+      <option value="10">Lapkritis</option><option value="11">Gruodis</option>
+    </select>
+    <select id="m-year-sel" class="mv-sel" onchange="onMonthSel()"></select>
+    <button class="mv-nav" onclick="navMonth(1)">›</button>
+    <span style="color:#8e8e93;font-weight:500;font-size:15px">— mėnesinis vaizdas</span>
   </div>
-  <div class="section">
-    <h2 class="section-title" id="monthly-title">Mėnesinis vaizdas</h2>
-    <div class="rank-grid" id="monthly-cards"></div>
-    <div class="chart-legend" id="monthly-legend"></div>
-    <div class="chart-wrap"><canvas id="monthly-chart"></canvas></div>
-  </div>
+  <div class="rank-grid" id="monthly-cards"></div>
+  <div class="chart-legend" id="monthly-legend"></div>
+  <div class="chart-wrap" style="height:260px"><canvas id="monthly-chart"></canvas></div>
 </div>
 
 <div class="section yearly-section" style="margin-top:1.25rem;">
@@ -375,7 +383,9 @@ function renderShiftBarsChart(periodData, canvasId, legendId, showFuture) {
     `<span style="margin-left:6px;padding-left:8px;border-left:1px solid #e5e5ea;display:flex;align-items:center;gap:4px">` +
     `<span style="width:18px;border-top:2px dashed #E24B4A;display:inline-block"></span>Tikslas</span>`;
 
-  new Chart(document.getElementById(canvasId), {
+  const _cv = document.getElementById(canvasId);
+  const _ex = Chart.getChart(_cv); if (_ex) _ex.destroy();
+  new Chart(_cv, {
     type: 'bar',
     data: {
       labels,
@@ -530,9 +540,47 @@ function renderRecords(data) {
   document.getElementById('records-banner').innerHTML = html;
 }
 
+let PROD_DATA = [];
+let selYear, selMonth;
+
+function renderMonthlyView() {
+  const now = new Date();
+  const isCurrent = (selYear === now.getFullYear() && selMonth === now.getMonth());
+  const monthStart = toDateStr(new Date(selYear, selMonth, 1));
+  const lastDay    = new Date(selYear, selMonth + 1, 0);
+  const monthEnd   = isCurrent ? toDateStr(now) : toDateStr(lastDay);
+
+  const monthlyData  = filterRange(PROD_DATA, monthStart, monthEnd);
+  const monthlyStats = buildStats(monthlyData, PROD_DATA);
+
+  document.getElementById('m-month-sel').value = selMonth;
+  document.getElementById('m-year-sel').value  = selYear;
+  renderCards(monthlyStats, 'monthly-cards');
+  renderShiftBarsChart(monthlyData, 'monthly-chart', 'monthly-legend', isCurrent);
+}
+
+function navMonth(dir) {
+  selMonth += dir;
+  if (selMonth < 0)  { selMonth = 11; selYear--; }
+  if (selMonth > 11) { selMonth = 0;  selYear++; }
+  const ySel = document.getElementById('m-year-sel');
+  if (![...ySel.options].some(o => parseInt(o.value) === selYear)) {
+    const opt = document.createElement('option'); opt.value = selYear; opt.textContent = selYear; ySel.appendChild(opt);
+    [...ySel.options].sort((a,b)=>b.value-a.value).forEach(o=>ySel.appendChild(o));
+  }
+  renderMonthlyView();
+}
+
+function onMonthSel() {
+  selMonth = parseInt(document.getElementById('m-month-sel').value);
+  selYear  = parseInt(document.getElementById('m-year-sel').value);
+  renderMonthlyView();
+}
+
 function init(data) {
   const now      = new Date();
   const todayStr = toDateStr(now);
+  PROD_DATA = data;
 
   renderRecords(data);
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
@@ -540,26 +588,15 @@ function init(data) {
   document.getElementById('month-display').textContent = now.getDate() + ' / ' + daysInMonth;
   document.getElementById('day-display').textContent   = MONTH_NAMES[now.getMonth()] + ' ' + now.getFullYear();
 
-  // 8 dienų ciklas
-  const cycleStart    = new Date(now);
-  cycleStart.setDate(cycleStart.getDate() - (CONFIG.cycle_days - 1));
-  const cycleStartStr = toDateStr(cycleStart);
-  const cycleData     = filterRange(data, cycleStartStr, todayStr);
-  const cycleStats    = buildStats(cycleData, data);
-  const fmtDate = d => d.toLocaleDateString('lt-LT', { month: 'short', day: 'numeric' });
-  document.getElementById('cycle-title').textContent =
-    fmtDate(cycleStart) + ' – ' + fmtDate(now) + ' · 8 dienų ciklas';
-  renderCards(cycleStats, 'cycle-cards');
-  renderShiftBarsChart(cycleData, 'cycle-chart', 'cycle-legend', false);
-
-  // Mėnesinis vaizdas
-  const monthStart   = toDateStr(new Date(now.getFullYear(), now.getMonth(), 1));
-  const monthlyData  = filterRange(data, monthStart, todayStr);
-  const monthlyStats = buildStats(monthlyData, data);
-  document.getElementById('monthly-title').textContent =
-    MONTH_NAMES[now.getMonth()] + ' ' + now.getFullYear() + ' — mėnesinis vaizdas';
-  renderCards(monthlyStats, 'monthly-cards');
-  renderShiftBarsChart(monthlyData, 'monthly-chart', 'monthly-legend', true);
+  // Mėnesinis vaizdas — su mėnesio pasirinkimu
+  const years = [...new Set(data.map(d => (d.date || '').substring(0, 4)).filter(y => /^\d{4}$/.test(y)))].map(Number);
+  const minY = Math.min(...years, now.getFullYear());
+  const maxY = Math.max(...years, now.getFullYear());
+  const ySel = document.getElementById('m-year-sel');
+  ySel.innerHTML = '';
+  for (let y = maxY; y >= minY; y--) { const o = document.createElement('option'); o.value = y; o.textContent = y; ySel.appendChild(o); }
+  selYear = now.getFullYear(); selMonth = now.getMonth();
+  renderMonthlyView();
 
   // Metinis vaizdas
   const yearStart   = toDateStr(new Date(now.getFullYear(), 0, 1));
