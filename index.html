@@ -266,6 +266,16 @@ const SHIFT_COLORS = [
   { bg: 'rgba(91,155,213,0.85)',  border: '#2A6FAD' },
 ];
 
+// Escape sheet-supplied strings before they reach innerHTML. Most rendered
+// values here are numeric, but the CSV `date` field is unvalidated and its raw
+// year segment flows into innerHTML via fmtDate — a crafted date in the sheet
+// would otherwise inject markup onto the factory board and the public page.
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function toDateStr(d) {
   return d.getFullYear() + '-' +
     String(d.getMonth() + 1).padStart(2, '0') + '-' +
@@ -274,6 +284,27 @@ function toDateStr(d) {
 
 function filterRange(data, from, to) {
   return data.filter(d => d.date >= from && d.date <= to);
+}
+
+// Quote-aware CSV parser — handles quoted fields containing commas, escaped
+// quotes ("") and embedded newlines. A naive split(',') silently shifts every
+// column after a comma-bearing cell, producing plausible-but-wrong KPIs.
+function parseCSV(text) {
+  const rows = []; let row = [], field = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else q = false; }
+      else field += c;
+    } else {
+      if (c === '"') q = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else if (c !== '\r') field += c;
+    }
+  }
+  if (field !== '' || row.length) { row.push(field); rows.push(row); }
+  return rows;
 }
 
 function buildStats(periodData, allData) {
@@ -453,7 +484,9 @@ function renderYearlyChart(data, canvasId, legendId) {
       `<span><span class="legend-dot" style="background:${SHIFT_COLORS[i].bg}"></span>${s} pam.</span>`
     ).join('');
 
-  new Chart(document.getElementById(canvasId), {
+  const _yc = document.getElementById(canvasId);
+  const _yex = Chart.getChart(_yc); if (_yex) _yex.destroy();
+  new Chart(_yc, {
     type: 'bar',
     data: { labels, datasets },
     options: {
@@ -508,8 +541,8 @@ function computeRecords(data) {
 function renderRecords(data) {
   const { maxRec, ecoRec } = computeRecords(data);
   const fmtDate = ds => {
-    const p = ds.split('-');
-    return (+p[2]) + ' ' + MONTH_SHORT[(+p[1]) - 1] + ' ' + p[0];
+    const p = String(ds).split('-');
+    return (+p[2]) + ' ' + (MONTH_SHORT[(+p[1]) - 1] || '') + ' ' + escapeHtml(p[0]);
   };
   const shiftBadge = s => {
     const c = SHIFT_COLORS[s - 1] || SHIFT_COLORS[0];
@@ -618,16 +651,14 @@ async function loadAndRender() {
     const resp = await fetch(CSV_URL + '&t=' + Date.now());
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const text = await resp.text();
-    const rows = text.trim().split('\n');
-    const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
+    const rows = parseCSV(text).filter(r => r.some(c => c.trim() !== ''));
+    const headers = rows[0].map(h => h.trim().toLowerCase());
 
     const M3_COLS    = ['m3 extra', 'm3 medium', 'm3 premium', 'm3 silos'];
     const WASTE_COLS = ['fines', 'krit'];
 
     const data = rows.slice(1)
-      .filter(r => r.trim())
-      .map(row => {
-        const vals = row.split(',');
+      .map(vals => {
         const o = {};
         headers.forEach((h, i) => { o[h] = (vals[i] || '').trim(); });
 
