@@ -148,8 +148,29 @@ body {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.25rem;
+  margin-bottom: 1rem;
+}
+.shift-records-banner {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
   margin-bottom: 1.25rem;
 }
+@media (max-width: 900px) { .shift-records-banner { grid-template-columns: 1fr 1fr; } }
+.shift-rec-card {
+  background: white;
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  border-left: 5px solid;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.shift-rec-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.shift-rec-num { font-size: 11px; font-weight: 800; color: #fff; padding: 2px 9px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+.shift-rec-title { font-size: 11px; font-weight: 700; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.4px; }
+.shift-rec-val { font-size: 32px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
+.shift-rec-date { font-size: 12px; color: #8e8e93; margin-top: 3px; }
 @media (max-width: 900px) { .records-banner { grid-template-columns: 1fr; } }
 .record-card {
   background: white;
@@ -210,6 +231,7 @@ body {
 </div>
 
 <div class="records-banner" id="records-banner"></div>
+<div class="shift-records-banner" id="shift-records-banner"></div>
 
 <div class="section">
   <div class="section-title" style="display:flex;align-items:center;gap:0.55rem;flex-wrap:wrap">
@@ -522,7 +544,7 @@ function computeRecords(data) {
   });
   const arr = Object.values(byShiftDay);
 
-  // Daugiausiai m³ per vieną pamainą
+  // Daugiausiai m³ per vieną pamainą (bendras)
   let maxRec = null;
   arr.forEach(r => { if (!maxRec || r.m3 > maxRec.m3) maxRec = r; });
 
@@ -535,11 +557,17 @@ function computeRecords(data) {
     }
   });
 
-  return { maxRec, ecoRec };
+  // Kiekvienos pamainos rekordas atskirai
+  const shiftBest = {};
+  arr.forEach(r => {
+    if (!shiftBest[r.shift] || r.m3 > shiftBest[r.shift].m3) shiftBest[r.shift] = r;
+  });
+
+  return { maxRec, ecoRec, shiftBest };
 }
 
 function renderRecords(data) {
-  const { maxRec, ecoRec } = computeRecords(data);
+  const { maxRec, ecoRec, shiftBest } = computeRecords(data);
   const fmtDate = ds => {
     const p = String(ds).split('-');
     return (+p[2]) + ' ' + (MONTH_SHORT[(+p[1]) - 1] || '') + ' ' + escapeHtml(p[0]);
@@ -571,6 +599,25 @@ function renderRecords(data) {
     </div>`;
   }
   document.getElementById('records-banner').innerHTML = html;
+
+  // Kiekvienos pamainos rekordas
+  const bestM3 = Math.max(...[1,2,3,4].map(s => shiftBest[s]?.m3 || 0));
+  const shiftHtml = [1,2,3,4].map(s => {
+    const c = SHIFT_COLORS[s - 1];
+    const rec = shiftBest[s];
+    const isChamp = rec && rec.m3 === bestM3;
+    const fmtD = ds => { const p = String(ds).split('-'); return (+p[2]) + ' ' + (MONTH_SHORT[(+p[1])-1]||'') + ' ' + escapeHtml(p[0]); };
+    return `<div class="shift-rec-card" style="border-color:${c.border}${isChamp ? ';box-shadow:0 0 0 2px '+c.border : ''}">
+      <div class="shift-rec-header">
+        <span class="shift-rec-num" style="background:${c.border}">${s} pamaina</span>
+        ${isChamp ? '<span style="font-size:18px">🏆</span>' : ''}
+      </div>
+      <div class="shift-rec-title">Rekordas per pamainą</div>
+      <div class="shift-rec-val" style="color:${c.border}">${rec ? rec.m3.toLocaleString('lt-LT') + ' m³' : '—'}</div>
+      <div class="shift-rec-date">${rec ? fmtD(rec.date) : ''}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('shift-records-banner').innerHTML = shiftHtml;
 }
 
 let PROD_DATA = [];
