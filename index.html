@@ -655,8 +655,8 @@ async function loadAndRender() {
     const headers = rows[0].map(h => h.trim().toLowerCase());
 
     const M3_COLS    = ['premium m3', 'medium m3', 'extra m3', 'a silos m3', 'b silos m3', 'c silos m3'];
-    const BB_COLS    = ['premium bb', 'medium bb', 'extra bb', 'e bb', 'd bb', 'e maisiukai'];
-    const WASTE_COLS = ['fines', 'krit'];
+    const BB_COLS    = ['premium bb', 'medium bb', 'extra bb', 'd bb'];
+    const WASTE_COLS = ['fines', 'krit', 'e bb', 'e maisiukai'];
     const RAW_COLS   = ['1 zaliava kg', '2 zaliava kg', '3 zaliava kg', '4 zaliava kg'];
 
     const data = rows.slice(1)
