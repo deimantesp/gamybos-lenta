@@ -490,14 +490,23 @@ function renderYearlyChart(data, canvasId, legendId) {
   const months = [...new Set(data.map(d => d.date.substring(0, 7)))].sort();
   const labels  = months.map(m => MONTH_SHORT[parseInt(m.split('-')[1]) - 1]);
 
-  const datasets = [1, 2, 3, 4].map(s => ({
-    label: s + ' pamaina',
-    data: months.map(month => {
-      const rows = data.filter(d => d.shift === s && d.date.startsWith(month));
-      return +rows.reduce((a, b) => a + b.m3, 0).toFixed(1);
-    }),
-    backgroundColor: SHIFT_COLORS[s - 1].bg,
-    borderColor: SHIFT_COLORS[s - 1].border,
+  // Kiekvienam mėnesiui — pamainos surūšiuotos pagal m³ didėjančiai (mažiausia apačioje)
+  const monthSorted = months.map(month =>
+    [1, 2, 3, 4]
+      .map(s => ({
+        shift: s,
+        m3: +data.filter(d => d.shift === s && d.date.startsWith(month))
+                 .reduce((a, b) => a + b.m3, 0).toFixed(1),
+      }))
+      .sort((a, b) => a.m3 - b.m3)   // mažiausia [0], didžiausia [3]
+  );
+
+  // 4 "rango" datasets — kiekvienas = viena pozicija stulpelyje (apačia→viršus)
+  const datasets = [0, 1, 2, 3].map(rank => ({
+    label: 'rank' + rank,
+    data:            monthSorted.map(s => s[rank]?.m3 || 0),
+    backgroundColor: monthSorted.map(s => SHIFT_COLORS[(s[rank]?.shift || 1) - 1].bg),
+    borderColor:     monthSorted.map(s => SHIFT_COLORS[(s[rank]?.shift || 1) - 1].border),
     borderWidth: 1,
   }));
 
@@ -514,7 +523,17 @@ function renderYearlyChart(data, canvasId, legendId) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const s = monthSorted[ctx.dataIndex]?.[ctx.datasetIndex];
+              return s ? ` ${s.shift} pamaina: ${s.m3.toLocaleString('lt-LT')} m³` : '';
+            },
+          },
+        },
+      },
       scales: {
         x: {
           stacked: true,
@@ -526,9 +545,9 @@ function renderYearlyChart(data, canvasId, legendId) {
           min: 0,
           ticks: { font: { size: 11, family: "'Montserrat', sans-serif" } },
           grid: { color: 'rgba(0,0,0,0.04)' },
-        }
-      }
-    }
+        },
+      },
+    },
   });
 }
 
