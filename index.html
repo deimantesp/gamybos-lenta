@@ -654,8 +654,10 @@ async function loadAndRender() {
     const rows = parseCSV(text).filter(r => r.some(c => c.trim() !== ''));
     const headers = rows[0].map(h => h.trim().toLowerCase());
 
-    const M3_COLS    = ['m3 extra', 'm3 medium', 'm3 premium', 'm3 silos'];
+    const M3_COLS    = ['premium m3', 'medium m3', 'extra m3', 'a silos m3', 'b silos m3', 'c silos m3'];
+    const BB_COLS    = ['premium bb', 'medium bb', 'extra bb', 'e bb', 'd bb', 'e maisiukai'];
     const WASTE_COLS = ['fines', 'krit'];
+    const RAW_COLS   = ['1 zaliava kg', '2 zaliava kg', '3 zaliava kg', '4 zaliava kg'];
 
     const data = rows.slice(1)
       .map(vals => {
@@ -665,16 +667,21 @@ async function loadAndRender() {
         const m3sum = M3_COLS.reduce((s, k) => s + (parseFloat(o[k]) || 0), 0);
         const m3    = m3sum > 0 ? m3sum : (parseFloat(o.m3) || 0);
         const waste = WASTE_COLS.reduce((s, k) => s + (parseFloat(o[k]) || 0), 0);
+        const bb    = BB_COLS.reduce((s, k) => s + (parseFloat(o[k]) || 0), 0);
+        const raw   = RAW_COLS.reduce((s, k) => s + (parseFloat(o[k]) || 0), 0) || (parseFloat(o.raw) || 0);
 
         return {
           date:  o.date  || '',
           shift: parseInt(o.shift) || 0,
           type:  o.type  || '',
+          furn:  o.furn  || '',
           m3,
+          bb,
           waste,
           gas:   parseFloat(o.gas) || 0,
           kwh:   parseFloat(o.kwh) || 0,
-          raw:   parseFloat(o.raw) || 0,
+          raw,
+          komentaras: o['komentarai pildytojui'] || '',
         };
       })
       .filter(d => d.date && d.shift > 0);
@@ -687,6 +694,7 @@ async function loadAndRender() {
         grouped[key] = { ...d };
       } else {
         grouped[key].m3    += d.m3;
+        grouped[key].bb    += d.bb;
         grouped[key].waste += d.waste;
         grouped[key].gas   += d.gas;
         grouped[key].kwh   += d.kwh;
