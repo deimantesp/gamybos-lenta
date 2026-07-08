@@ -654,32 +654,40 @@ async function loadAndRender() {
     const rows = parseCSV(text).filter(r => r.some(c => c.trim() !== ''));
     const headers = rows[0].map(h => h.trim().toLowerCase());
 
-    const M3_COLS    = ['premium m3', 'medium m3', 'extra m3', 'a silos m3', 'b silos m3', 'c silos m3'];
-    const BB_COLS    = ['premium bb', 'medium bb', 'extra bb', 'd bb'];
-    const WASTE_COLS = ['fines', 'krit', 'e bb', 'e maisiukai'];
-    const RAW_COLS   = ['1 zaliava kg', '2 zaliava kg', '3 zaliava kg', '4 zaliava kg'];
+    const M3_COLS    = ['produktas premium m3','produktas extra m3','produktas ekstra m3',
+                        'produktas medium m3','produktas 0-1mm m3',
+                        'produktas a silos m3','produktas b silos m3','produktas c silos m3',
+                        // senų stulpelių suderinamumas:
+                        'premium m3','medium m3','extra m3','a silos m3','b silos m3','c silos m3'];
+    const BB_COLS    = ['produktas premium bb','produktas extra bb','produktas ekstra bb',
+                        'produktas medium bb','produktas 0-1mm bb','d bb','d bb kg'];
+    const WASTE_COLS = ['krituliai','krit','fines','e bb','e bb kg','e maisai'];
+    const RAW_COLS   = ['0 zaliava kg','1 zaliava kg','2 zaliava kg','9 zaliava kg','x zaliava kg',
+                        '3 zaliava kg','4 zaliava kg'];
+
+    const n = v => parseFloat(String(v || '').replace(',', '.')) || 0;
 
     const data = rows.slice(1)
       .map(vals => {
         const o = {};
         headers.forEach((h, i) => { o[h] = (vals[i] || '').trim(); });
 
-        const m3sum = M3_COLS.reduce((s, k) => s + (parseFloat(o[k]) || 0), 0);
-        const m3    = m3sum > 0 ? m3sum : (parseFloat(o.m3) || 0);
-        const waste = WASTE_COLS.reduce((s, k) => s + (parseFloat(o[k]) || 0), 0);
-        const bb    = BB_COLS.reduce((s, k) => s + (parseFloat(o[k]) || 0), 0);
-        const raw   = RAW_COLS.reduce((s, k) => s + (parseFloat(o[k]) || 0), 0) || (parseFloat(o.raw) || 0);
+        const m3sum = M3_COLS.reduce((s, k) => s + n(o[k]), 0);
+        const m3    = m3sum > 0 ? m3sum : n(o.m3);
+        const waste = WASTE_COLS.reduce((s, k) => s + n(o[k]), 0);
+        const bb    = BB_COLS.reduce((s, k) => s + n(o[k]), 0);
+        const raw   = RAW_COLS.reduce((s, k) => s + n(o[k]), 0) || n(o.raw);
 
         return {
           date:  o.date  || '',
-          shift: parseInt(o.shift) || 0,
-          type:  o.type  || '',
+          shift: parseInt(o['pamaina'] || o['shift']) || 0,
+          type:  o['pamaina tip'] || o['type'] || '',
           furn:  o.furn  || '',
           m3,
           bb,
           waste,
-          gas:   parseFloat(o.gas) || 0,
-          kwh:   parseFloat(o.kwh) || 0,
+          gas:   n(o['dujos m3'] || o.gas),
+          kwh:   n(o['elektra kwh'] || o.kwh),
           raw,
           komentaras: o['komentarai pildytojui'] || '',
         };
