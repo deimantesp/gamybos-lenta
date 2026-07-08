@@ -628,7 +628,14 @@ function init(data) {
   const ySel = document.getElementById('m-year-sel');
   ySel.innerHTML = '';
   for (let y = maxY; y >= minY; y--) { const o = document.createElement('option'); o.value = y; o.textContent = y; ySel.appendChild(o); }
-  selYear = now.getFullYear(); selMonth = now.getMonth();
+  // Rodyti paskutinį mėnesį su duomenimis (ne dabartinį, jei duomenų dar nėra)
+  const lastDate = data.map(d => d.date).filter(Boolean).sort().pop() || '';
+  if (lastDate && lastDate < toDateStr(new Date(now.getFullYear(), now.getMonth(), 1))) {
+    selYear  = parseInt(lastDate.substring(0, 4));
+    selMonth = parseInt(lastDate.substring(5, 7)) - 1;
+  } else {
+    selYear = now.getFullYear(); selMonth = now.getMonth();
+  }
   renderMonthlyView();
 
   // Metinis vaizdas
