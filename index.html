@@ -544,9 +544,10 @@ function computeRecords(data) {
   });
   const arr = Object.values(byShiftDay);
 
-  // Daugiausiai m³ per vieną pamainą (bendras)
+  // Daugiausiai m³ — VIENAS PEČIUS, viena pamaina (iš nesusumuotų eilučių)
+  const rawArr = window.RAW_SHIFT_DATA || arr;
   let maxRec = null;
-  arr.forEach(r => { if (!maxRec || r.m3 > maxRec.m3) maxRec = r; });
+  rawArr.forEach(r => { if (r.m3 > 0 && (!maxRec || r.m3 > maxRec.m3)) maxRec = r; });
 
   // Ekonomiškiausia: didžiausias m³/dujos (tik pilnesnės pamainos, gas>0)
   let ecoRec = null;
@@ -582,7 +583,7 @@ function renderRecords(data) {
     html += `<div class="record-card rec-max">
       <div class="record-icon">🏆</div>
       <div class="record-body">
-        <div class="record-label">Daugiausiai per pamainą</div>
+        <div class="record-label">Daugiausiai per pamainą · 1 pečius</div>
         <div class="record-value">${maxRec.m3.toLocaleString('lt-LT')} m³</div>
         <div class="record-meta">${shiftBadge(maxRec.shift)} · ${fmtDate(maxRec.date)}</div>
       </div>
@@ -599,25 +600,7 @@ function renderRecords(data) {
     </div>`;
   }
   document.getElementById('records-banner').innerHTML = html;
-
-  // Kiekvienos pamainos rekordas
-  const bestM3 = Math.max(...[1,2,3,4].map(s => shiftBest[s]?.m3 || 0));
-  const shiftHtml = [1,2,3,4].map(s => {
-    const c = SHIFT_COLORS[s - 1];
-    const rec = shiftBest[s];
-    const isChamp = rec && rec.m3 === bestM3;
-    const fmtD = ds => { const p = String(ds).split('-'); return (+p[2]) + ' ' + (MONTH_SHORT[(+p[1])-1]||'') + ' ' + escapeHtml(p[0]); };
-    return `<div class="shift-rec-card" style="border-color:${c.border}${isChamp ? ';box-shadow:0 0 0 2px '+c.border : ''}">
-      <div class="shift-rec-header">
-        <span class="shift-rec-num" style="background:${c.border}">${s} pamaina</span>
-        ${isChamp ? '<span style="font-size:18px">🏆</span>' : ''}
-      </div>
-      <div class="shift-rec-title">Rekordas per pamainą</div>
-      <div class="shift-rec-val" style="color:${c.border}">${rec ? rec.m3.toLocaleString('lt-LT') + ' m³' : '—'}</div>
-      <div class="shift-rec-date">${rec ? fmtD(rec.date) : ''}</div>
-    </div>`;
-  }).join('');
-  document.getElementById('shift-records-banner').innerHTML = shiftHtml;
+  document.getElementById('shift-records-banner').innerHTML = '';
 }
 
 let PROD_DATA = [];
@@ -764,6 +747,9 @@ async function loadAndRender() {
       }
     });
     const mergedData = Object.values(grouped);
+
+    // Saugom nesusumuotus duomenis — vienas įrašas = vienas pečius, viena pamaina
+    window.RAW_SHIFT_DATA = data;
 
     init(mergedData);
   } catch (e) {
