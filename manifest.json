@@ -1,0 +1,11 @@
+{
+  "name": "Gamybos lenta",
+  "short_name": "Gamyba",
+  "start_url": "/gamybos-lenta/",
+  "display": "standalone",
+  "background_color": "#3a1a00",
+  "theme_color": "#3a1a00",
+  "icons": [
+    { "src": "logo.png", "sizes": "any", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
