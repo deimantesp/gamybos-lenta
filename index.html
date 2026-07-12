@@ -201,26 +201,33 @@ body {
 #pranesimas-banner {
   margin-bottom: 1rem;
   border-radius: 16px;
-  background: #C0392B;
+  background: #fff;
+  border: 2px dashed #e0e0e0;
   display: flex;
   align-items: center;
   gap: 1.2rem;
-  min-height: 72px;
+  min-height: 60px;
   cursor: pointer;
   padding: 0.9rem 1.2rem;
-  transition: filter 0.15s;
+  transition: background 0.25s, border-color 0.25s;
 }
-#pranesimas-banner:hover { filter: brightness(1.08); }
+#pranesimas-banner.active {
+  background: #C0392B;
+  border: 2px solid #C0392B;
+}
+#pranesimas-banner:not(.active):hover { border-color: #C0392B; background: #fff5f5; }
 #pranesimas-label {
-  color: #fff;
-  font-size: 15px;
+  color: #c7c7cc;
+  font-size: 13px;
   font-weight: 900;
   letter-spacing: 3px;
   text-transform: uppercase;
   white-space: nowrap;
   user-select: none;
   flex-shrink: 0;
+  transition: color 0.25s;
 }
+#pranesimas-banner.active #pranesimas-label { color: #fff; }
 #pranesimas-label.blinking { animation: blinkLabel 1s ease-in-out infinite; }
 #pranesimas-body { flex: 1; display: flex; align-items: center; }
 #pranesimas-text {
@@ -232,14 +239,14 @@ body {
   word-break: break-word;
 }
 #pranesimas-empty {
-  font-size: 16px;
-  color: rgba(255,255,255,0.45);
+  font-size: 14px;
+  color: #c7c7cc;
   font-style: italic;
 }
 #pranesimas-input {
   display: none;
   width: 100%;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 800;
   color: #fff;
   border: none;
@@ -857,6 +864,8 @@ loadAndRender();
 
   const lbl = document.getElementById('pranesimas-label');
 
+  const banner = document.getElementById('pranesimas-banner');
+
   function pranesRender() {
     const msg = localStorage.getItem(KEY) || '';
     if (msg) {
@@ -865,11 +874,13 @@ loadAndRender();
       empty.style.display = 'none';
       clr.style.display = '';
       lbl.classList.add('blinking');
+      banner.classList.add('active');
     } else {
       txt.style.display = 'none';
       empty.style.display = '';
       clr.style.display = 'none';
       lbl.classList.remove('blinking');
+      banner.classList.remove('active');
     }
     inp.style.display = 'none';
   }
