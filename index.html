@@ -196,28 +196,22 @@ body {
 .record-card.rec-max .record-value { color: #C47A00; }
 
 /* ── PRANEŠIMAS ── */
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.08} }
-@keyframes blinkLabel { 0%,100%{opacity:1} 50%{opacity:0.3} }
+@keyframes blinkLabel { 0%,100%{opacity:1} 50%{opacity:0.2} }
 #pranesimas-banner {
   margin-bottom: 1rem;
   border-radius: 16px;
-  background: #fff;
-  border: 2px dashed #e0e0e0;
+  background: #f5f5f7;
+  border: 2px solid #e0e0e0;
   display: flex;
   align-items: center;
   gap: 1.2rem;
-  min-height: 60px;
+  min-height: 64px;
   cursor: pointer;
   padding: 0.9rem 1.2rem;
-  transition: background 0.25s, border-color 0.25s;
 }
-#pranesimas-banner.active {
-  background: #C0392B;
-  border: 2px solid #C0392B;
-}
-#pranesimas-banner:not(.active):hover { border-color: #C0392B; background: #fff5f5; }
+#pranesimas-banner:hover { border-color: #bbb; }
 #pranesimas-label {
-  color: #c7c7cc;
+  color: #aaa;
   font-size: 13px;
   font-weight: 900;
   letter-spacing: 3px;
@@ -225,22 +219,21 @@ body {
   white-space: nowrap;
   user-select: none;
   flex-shrink: 0;
-  transition: color 0.25s;
+  transition: color 0.2s;
 }
-#pranesimas-banner.active #pranesimas-label { color: #fff; }
-#pranesimas-label.blinking { animation: blinkLabel 1s ease-in-out infinite; }
+#pranesimas-label.red { color: #C0392B; animation: blinkLabel 1s ease-in-out infinite; }
 #pranesimas-body { flex: 1; display: flex; align-items: center; }
 #pranesimas-text {
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 900;
-  color: #fff;
-  animation: blink 1s ease-in-out infinite;
+  color: #111;
   line-height: 1.25;
   word-break: break-word;
+  display: none;
 }
 #pranesimas-empty {
   font-size: 14px;
-  color: #c7c7cc;
+  color: #bbb;
   font-style: italic;
 }
 #pranesimas-input {
@@ -248,21 +241,21 @@ body {
   width: 100%;
   font-size: 26px;
   font-weight: 800;
-  color: #fff;
+  color: #111;
   border: none;
-  border-bottom: 2px solid rgba(255,255,255,0.5);
+  border-bottom: 2px solid #ccc;
   outline: none;
   font-family: inherit;
   background: transparent;
   padding: 2px 0;
 }
-#pranesimas-input::placeholder { color: rgba(255,255,255,0.4); }
+#pranesimas-input::placeholder { color: #bbb; font-weight: 400; font-size: 18px; }
 #pranesimas-clear {
-  background: rgba(255,255,255,0.2); border: none; cursor: pointer;
-  font-size: 22px; color: #fff; padding: 4px 10px; border-radius: 8px;
+  background: #e0e0e0; border: none; cursor: pointer;
+  font-size: 20px; color: #555; padding: 4px 10px; border-radius: 8px;
   flex-shrink: 0; line-height: 1; font-weight: 700;
 }
-#pranesimas-clear:hover { background: rgba(255,255,255,0.35); }
+#pranesimas-clear:hover { background: #ccc; }
 .record-meta { font-size: 14px; color: #8e8e93; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .record-shift-badge { display: inline-block; font-weight: 700; padding: 2px 10px; border-radius: 20px; font-size: 13px; color: #fff; }
 .status-bar {
@@ -856,41 +849,36 @@ loadAndRender();
 
 /* ── PRANEŠIMAS ── */
 (function() {
-  const KEY = 'gb_pranesimas';
-  const txt  = document.getElementById('pranesimas-text');
+  const KEY   = 'gb_pranesimas';
+  const txt   = document.getElementById('pranesimas-text');
   const empty = document.getElementById('pranesimas-empty');
-  const inp  = document.getElementById('pranesimas-input');
-  const clr  = document.getElementById('pranesimas-clear');
-
-  const lbl = document.getElementById('pranesimas-label');
-
-  const banner = document.getElementById('pranesimas-banner');
+  const inp   = document.getElementById('pranesimas-input');
+  const clr   = document.getElementById('pranesimas-clear');
+  const lbl   = document.getElementById('pranesimas-label');
 
   function pranesRender() {
     const msg = localStorage.getItem(KEY) || '';
+    inp.style.display = 'none';
     if (msg) {
       txt.textContent = msg;
-      txt.style.display = '';
+      txt.style.display = 'block';
       empty.style.display = 'none';
-      clr.style.display = '';
-      lbl.classList.add('blinking');
-      banner.classList.add('active');
+      clr.style.display = 'block';
+      lbl.classList.add('red');
     } else {
       txt.style.display = 'none';
-      empty.style.display = '';
+      empty.style.display = 'block';
       clr.style.display = 'none';
-      lbl.classList.remove('blinking');
-      banner.classList.remove('active');
+      lbl.classList.remove('red');
     }
-    inp.style.display = 'none';
   }
 
   window.pranesEdit = function() {
     const msg = localStorage.getItem(KEY) || '';
     txt.style.display = 'none';
     empty.style.display = 'none';
-    inp.style.display = '';
-    banner.classList.add('active');
+    clr.style.display = 'none';
+    inp.style.display = 'block';
     inp.value = msg;
     inp.focus();
     inp.select();
@@ -904,7 +892,7 @@ loadAndRender();
 
   inp.addEventListener('keydown', e => {
     if (e.key === 'Enter') { inp.blur(); }
-    if (e.key === 'Escape') { inp.style.display = 'none'; pranesRender(); }
+    if (e.key === 'Escape') { pranesRender(); }
   });
 
   inp.addEventListener('blur', () => {
