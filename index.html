@@ -923,8 +923,25 @@ loadAndRender();
 
   const today = new Date().toISOString().slice(0, 10);
   const lt = ['Sausis','Vasaris','Kovas','Balandis','Gegužė','Birželis','Liepa','Rugpjūtis','Rugsėjis','Spalis','Lapkritis','Gruodis'];
-  const d   = new Date();
+  const d = new Date();
   dateEl.textContent = d.getDate() + ' ' + lt[d.getMonth()] + ' ' + d.getFullYear();
+
+  function parseSimpleCSV(text) {
+    const rows = [];
+    for (const line of text.split('\n')) {
+      const cells = [];
+      let cur = '', inQ = false;
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i];
+        if (c === '"') { if (inQ && line[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; }
+        else if (c === ',' && !inQ) { cells.push(cur); cur = ''; }
+        else cur += c;
+      }
+      cells.push(cur);
+      rows.push(cells);
+    }
+    return rows;
+  }
 
   const token = localStorage.getItem('po_secret');
   if (!token) return;
@@ -935,21 +952,23 @@ loadAndRender();
     body: JSON.stringify({ mode: 'read', token })
   })
   .then(r => r.json())
-  .then(json => {
-    if (!json.ok || !json.data) return;
-    const todayOrders = json.data
-      .filter(v => (v[2] || '').trim() === today && (v[4] || '').trim())
+  .then(out => {
+    if (!out.ok || !out.csv) return;
+    const rows = parseSimpleCSV(out.csv);
+    const todayOrders = rows
+      .slice(1)
+      .filter(v => /^\d+$/.test((v[0]||'').trim()) && (v[4]||'').trim() && (v[2]||'').trim() === today)
       .map(v => ({
-        produktas:  (v[3] || '').trim(),
-        uzsakovas:  (v[4] || '').trim(),
-        transportas:(v[7] || '').trim(),
+        produktas:   (v[3] || '').trim(),
+        uzsakovas:   (v[4] || '').trim(),
+        transportas: (v[7] || '').trim(),
       }));
     if (!todayOrders.length) return;
 
     block.style.display = 'block';
     rowsEl.innerHTML = todayOrders.map(o => `
-      <div style="display:flex;align-items:baseline;gap:1rem;padding:0.35rem 0;border-top:1px solid #f0f0f0;flex-wrap:wrap">
-        <span style="font-size:22px;font-weight:900;color:#111;min-width:120px">${o.produktas || '—'}</span>
+      <div style="display:flex;align-items:baseline;gap:1rem;padding:0.4rem 0;border-top:1px solid #f0f0f0;flex-wrap:wrap">
+        <span style="font-size:22px;font-weight:900;color:#111;min-width:100px">${o.produktas || '—'}</span>
         <span style="font-size:16px;font-weight:700;color:#555">${o.transportas || '—'}</span>
         <span style="font-size:16px;font-weight:600;color:#888">${o.uzsakovas || '—'}</span>
       </div>`).join('');
