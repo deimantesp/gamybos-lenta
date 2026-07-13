@@ -306,6 +306,13 @@ body {
   </div>
   <button id="pranesimas-clear" style="display:none" onclick="pranesClear(event)" title="Ištrinti">×</button>
 </div>
+<div id="today-krov-block" style="display:none;margin-bottom:1rem;background:#fff;border:2px solid #e0e0e0;border-radius:16px;padding:0.9rem 1.2rem">
+  <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.6rem">
+    <span id="today-krov-label" style="font-size:13px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#aaa">ŠIANDIEN KROVINIAI</span>
+    <span id="today-krov-date" style="font-size:13px;font-weight:700;color:#bbb"></span>
+  </div>
+  <div id="today-krov-rows"></div>
+</div>
 <div class="records-banner" id="records-banner"></div>
 <div class="shift-records-banner" id="shift-records-banner"></div>
 
@@ -905,6 +912,49 @@ loadAndRender();
   inp.addEventListener('click', e => e.stopPropagation());
 
   pranesRender();
+})();
+
+/* ── ŠIANDIEN KROVINIAI ── */
+(function() {
+  const ENDPOINT = 'https://script.google.com/macros/s/AKfycbz3O2FzFkxgoEOmNKvBxtKpVr6lVAX-VAPzvZSkJb4NL_dCUtGqqFYwSFPFeeeqY6Nk/exec';
+  const block    = document.getElementById('today-krov-block');
+  const rowsEl   = document.getElementById('today-krov-rows');
+  const dateEl   = document.getElementById('today-krov-date');
+
+  const today = new Date().toISOString().slice(0, 10);
+  const lt = ['Sausis','Vasaris','Kovas','Balandis','Gegužė','Birželis','Liepa','Rugpjūtis','Rugsėjis','Spalis','Lapkritis','Gruodis'];
+  const d   = new Date();
+  dateEl.textContent = d.getDate() + ' ' + lt[d.getMonth()] + ' ' + d.getFullYear();
+
+  const token = localStorage.getItem('po_secret');
+  if (!token) return;
+
+  fetch(ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ mode: 'read', token })
+  })
+  .then(r => r.json())
+  .then(json => {
+    if (!json.ok || !json.data) return;
+    const todayOrders = json.data
+      .filter(v => (v[2] || '').trim() === today && (v[4] || '').trim())
+      .map(v => ({
+        produktas:  (v[3] || '').trim(),
+        uzsakovas:  (v[4] || '').trim(),
+        transportas:(v[7] || '').trim(),
+      }));
+    if (!todayOrders.length) return;
+
+    block.style.display = 'block';
+    rowsEl.innerHTML = todayOrders.map(o => `
+      <div style="display:flex;align-items:baseline;gap:1rem;padding:0.35rem 0;border-top:1px solid #f0f0f0;flex-wrap:wrap">
+        <span style="font-size:22px;font-weight:900;color:#111;min-width:120px">${o.produktas || '—'}</span>
+        <span style="font-size:16px;font-weight:700;color:#555">${o.transportas || '—'}</span>
+        <span style="font-size:16px;font-weight:600;color:#888">${o.uzsakovas || '—'}</span>
+      </div>`).join('');
+  })
+  .catch(() => {});
 })();
 </script>
 </body>
