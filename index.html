@@ -953,11 +953,11 @@ loadAndRender();
     const rows = parseSimpleCSV(out.csv);
     const todayOrders = rows
       .slice(1)
-      .filter(v => /^\d+$/.test((v[0]||'').trim()) && (v[4]||'').trim() && (v[2]||'').trim() === today)
+      .filter(v => /^\d+$/.test((v[0]||'').trim()) && (v[5]||'').trim() && (v[2]||'').trim() === today)
       .map(v => ({
-        produktas:   (v[3] || '').trim(),
-        uzsakovas:   (v[4] || '').trim(),
-        transportas: (v[7] || '').trim(),
+        produktas:   (v[4] || '').trim(),
+        uzsakovas:   (v[5] || '').trim(),
+        transportas: (v[8] || '').trim(),
       }));
     if (!todayOrders.length) return;
 
