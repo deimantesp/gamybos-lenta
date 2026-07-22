@@ -21,7 +21,7 @@
 body {
   font-family: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
   background: #f2f2f7;
-  color: #1c1c1e;
+  color: #000;
   padding: 1.25rem 1.5rem;
   min-height: 100vh;
 }
@@ -32,9 +32,9 @@ body {
   margin-bottom: 1.25rem;
   gap: 1rem;
 }
-.page-title-sub { font-size: 15px; color: #6e6e73; margin-bottom: 4px; font-weight: 600; }
-.page-title { font-size: 34px; font-weight: 800; letter-spacing: -0.5px; }
-.page-meta { font-size: 15px; color: #6e6e73; margin-top: 5px; }
+.page-title-sub { font-size: 18px; color:#000; margin-bottom: 4px; font-weight: 600; }
+.page-title { font-size: 37px; font-weight: 800; letter-spacing: -0.5px; }
+.page-meta { font-size: 18px; color:#000; margin-top: 5px; }
 .month-box {
   background: white;
   border-radius: 12px;
@@ -43,8 +43,8 @@ body {
   white-space: nowrap;
   flex-shrink: 0;
 }
-.month-num { font-size: 26px; font-weight: 800; }
-.month-label { font-size: 13px; color: #6e6e73; margin-top: 2px; }
+.month-num { font-size: 29px; font-weight: 800; }
+.month-label { font-size: 16px; color:#000; margin-top: 2px; }
 .main-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -59,16 +59,16 @@ body {
   padding: 1.25rem;
 }
 .section-title {
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 700;
-  color: #3c3c43;
+  color:#000;
   margin-bottom: 1rem;
   padding-bottom: 0.75rem;
   border-bottom: 0.5px solid #e5e5ea;
 }
-.mv-nav { background: #f2f2f7; border: none; border-radius: 8px; width: 34px; height: 34px; font-size: 20px; font-weight: 700; cursor: pointer; color: #3c3c43; line-height: 1; }
+.mv-nav { background: #f2f2f7; border: none; border-radius: 8px; width: 34px; height: 34px; font-size: 23px; font-weight: 700; cursor: pointer; color:#000; line-height: 1; }
 .mv-nav:hover { background: #e5e5ea; }
-.mv-sel { font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 800; color: #0A2342; background: #f2f2f7; border: 1px solid #e5e5ea; border-radius: 8px; padding: 6px 10px; cursor: pointer; outline: none; }
+.mv-sel { font-family: 'Montserrat', sans-serif; font-size: 19px; font-weight: 800; color: #0A2342; background: #f2f2f7; border: 1px solid #e5e5ea; border-radius: 8px; padding: 6px 10px; cursor: pointer; outline: none; }
 .rank-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -96,7 +96,7 @@ body {
   align-items: flex-start;
 }
 .rank-badge {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 700;
   padding: 3px 9px;
   border-radius: 20px;
@@ -104,32 +104,32 @@ body {
   font-family: 'Montserrat', sans-serif;
 }
 .rank-badge[data-rank="1"] { background: #FEF3DA; color: #7A4A00; }
-.rank-badge[data-rank="2"] { background: #EFEFEF; color: #555; }
+.rank-badge[data-rank="2"] { background: #EFEFEF; color:#111; }
 .rank-badge[data-rank="3"] { background: #FBE8E4; color: #7A2010; }
 .rank-badge[data-rank="4"] { background: #E3EEF8; color: #1A4F80; }
-.card-medal { font-size: 30px; line-height: 1; }
-.card-name { font-size: 17px; font-weight: 700; margin: 7px 0 2px; }
+.card-medal { font-size: 33px; line-height: 1; }
+.card-name { font-size: 20px; font-weight: 700; margin: 7px 0 2px; }
 .card-total {
-  font-size: 44px;
+  font-size: 47px;
   font-weight: 900;
   line-height: 1;
-  color: #1c1c1e;
+  color: #000;
   letter-spacing: -1.5px;
 }
 .card-total[data-rank="1"] { color: #C47A00; }
-.card-unit { font-size: 12px; color: #8e8e93; margin-bottom: 8px; }
+.card-unit { font-size: 15px; color:#111; margin-bottom: 8px; }
 .stat-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
-  color: #8e8e93;
+  font-size: 15px;
+  color:#111;
   background: white;
   border-radius: 6px;
   padding: 4px 7px;
   margin-top: 4px;
 }
-.stat-val { font-weight: 700; font-size: 13px; color: #1c1c1e; }
+.stat-val { font-weight: 700; font-size: 16px; color: #000; }
 .stat-val.good { color: #1A7A4A; }
 .stat-val.bad  { color: #C0392B; }
 .stat-val.gold { color: #C47A00; }
@@ -138,8 +138,8 @@ body {
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 6px;
-  font-size: 13px;
-  color: #8e8e93;
+  font-size: 16px;
+  color:#111;
   align-items: center;
 }
 .legend-dot {
@@ -174,10 +174,10 @@ body {
   gap: 2px;
 }
 .shift-rec-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-.shift-rec-num { font-size: 11px; font-weight: 800; color: #fff; padding: 2px 9px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
-.shift-rec-title { font-size: 11px; font-weight: 700; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.4px; }
-.shift-rec-val { font-size: 32px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
-.shift-rec-date { font-size: 12px; color: #8e8e93; margin-top: 3px; }
+.shift-rec-num { font-size: 14px; font-weight: 800; color: #fff; padding: 2px 9px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+.shift-rec-title { font-size: 14px; font-weight: 700; color:#111; text-transform: uppercase; letter-spacing: 0.4px; }
+.shift-rec-val { font-size: 35px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
+.shift-rec-date { font-size: 15px; color:#111; margin-top: 3px; }
 @media (max-width: 900px) { .records-banner { grid-template-columns: 1fr; } }
 .record-card {
   background: white;
@@ -189,10 +189,10 @@ body {
   border-left: 6px solid;
 }
 .record-card.rec-max { border-color: #C47A00; }
-.record-icon { font-size: 46px; line-height: 1; flex-shrink: 0; }
+.record-icon { font-size: 49px; line-height: 1; flex-shrink: 0; }
 .record-body { flex: 1; min-width: 0; }
-.record-label { font-size: 13px; font-weight: 700; color: #6e6e73; text-transform: uppercase; letter-spacing: 0.5px; }
-.record-value { font-size: 40px; font-weight: 900; letter-spacing: -1.5px; line-height: 1.05; margin: 2px 0; }
+.record-label { font-size: 16px; font-weight: 700; color:#000; text-transform: uppercase; letter-spacing: 0.5px; }
+.record-value { font-size: 43px; font-weight: 900; letter-spacing: -1.5px; line-height: 1.05; margin: 2px 0; }
 .record-card.rec-max .record-value { color: #C47A00; }
 
 /* ── PRANEŠIMAS ── */
@@ -209,10 +209,10 @@ body {
   cursor: pointer;
   padding: 0.9rem 1.2rem;
 }
-#pranesimas-banner:hover { border-color: #bbb; }
+#pranesimas-banner:hover { border-color:#333; }
 #pranesimas-label {
-  color: #aaa;
-  font-size: 13px;
+  color:#000;
+  font-size: 16px;
   font-weight: 900;
   letter-spacing: 3px;
   text-transform: uppercase;
@@ -221,10 +221,10 @@ body {
   flex-shrink: 0;
   transition: color 0.2s;
 }
-#pranesimas-label.red { color: #C0392B; animation: blinkLabel 1s ease-in-out infinite; font-size: 22px; }
+#pranesimas-label.red { color: #C0392B; animation: blinkLabel 1s ease-in-out infinite; font-size: 25px; }
 #pranesimas-body { flex: 1; display: flex; align-items: center; }
 #pranesimas-text {
-  font-size: 52px;
+  font-size: 55px;
   font-weight: 900;
   color: #111;
   line-height: 1.2;
@@ -232,14 +232,14 @@ body {
   display: none;
 }
 #pranesimas-empty {
-  font-size: 14px;
-  color: #bbb;
+  font-size: 17px;
+  color:#333;
   font-style: italic;
 }
 #pranesimas-input {
   display: none;
   width: 100%;
-  font-size: 26px;
+  font-size: 29px;
   font-weight: 800;
   color: #111;
   border: none;
@@ -249,19 +249,19 @@ body {
   background: transparent;
   padding: 2px 0;
 }
-#pranesimas-input::placeholder { color: #bbb; font-weight: 400; font-size: 18px; }
+#pranesimas-input::placeholder { color:#333; font-weight: 400; font-size: 21px; }
 #pranesimas-clear {
   background: #e0e0e0; border: none; cursor: pointer;
-  font-size: 20px; color: #555; padding: 4px 10px; border-radius: 8px;
+  font-size: 23px; color:#111; padding: 4px 10px; border-radius: 8px;
   flex-shrink: 0; line-height: 1; font-weight: 700;
 }
 #pranesimas-clear:hover { background: #ccc; }
-.record-meta { font-size: 14px; color: #8e8e93; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.record-shift-badge { display: inline-block; font-weight: 700; padding: 2px 10px; border-radius: 20px; font-size: 13px; color: #fff; }
+.record-meta { font-size: 17px; color:#111; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.record-shift-badge { display: inline-block; font-weight: 700; padding: 2px 10px; border-radius: 20px; font-size: 16px; color: #fff; }
 .status-bar {
   text-align: center;
-  font-size: 13px;
-  color: #c7c7cc;
+  font-size: 16px;
+  color:#444;
   margin-top: 1rem;
   padding-bottom: 0.5rem;
 }
@@ -273,9 +273,9 @@ body {
   background: rgba(242,242,247,0.85);
   align-items: center;
   justify-content: center;
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 700;
-  color: #6e6e73;
+  color:#000;
   z-index: 99;
 }
 #loading-overlay.visible { display: flex; }
@@ -296,22 +296,22 @@ body {
       <div class="month-num" id="month-display"></div>
       <div class="month-label" id="day-display"></div>
     </div>
-    <button onclick="openTokenDlg()" title="Nustatymai" style="background:rgba(255,255,255,0.15);border:none;border-radius:8px;padding:6px 10px;font-size:18px;cursor:pointer;color:#fff">⚙️</button>
+    <button onclick="openTokenDlg()" title="Nustatymai" style="background:rgba(255,255,255,0.15);border:none;border-radius:8px;padding:6px 10px;font-size:21px;cursor:pointer;color:#fff">⚙️</button>
   </div>
 </div>
 
 <!-- Token dialog -->
 <div id="token-dlg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center">
   <div style="background:#fff;border-radius:16px;padding:2rem;max-width:360px;width:90%;text-align:center">
-    <div style="font-size:18px;font-weight:800;margin-bottom:0.5rem">Prieigos kodas</div>
-    <div style="font-size:13px;color:#888;margin-bottom:1rem">Tas pats kodas kaip pardavimų analizėje</div>
+    <div style="font-size:21px;font-weight:800;margin-bottom:0.5rem">Prieigos kodas</div>
+    <div style="font-size:16px;color:#111;margin-bottom:1rem">Tas pats kodas kaip pardavimų analizėje</div>
     <input id="token-input" type="password" placeholder="Įveskite kodą…"
-      style="width:100%;padding:10px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:16px;margin-bottom:1rem;font-family:inherit">
+      style="width:100%;padding:10px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:19px;margin-bottom:1rem;font-family:inherit">
     <div style="display:flex;gap:0.6rem;justify-content:center">
-      <button onclick="closeTokenDlg()" style="flex:1;padding:10px;border:1.5px solid #ddd;border-radius:10px;background:#fff;font-size:15px;cursor:pointer">Atšaukti</button>
-      <button onclick="saveToken()" style="flex:1;padding:10px;border:none;border-radius:10px;background:#0A2342;color:#fff;font-size:15px;font-weight:700;cursor:pointer">Išsaugoti</button>
+      <button onclick="closeTokenDlg()" style="flex:1;padding:10px;border:1.5px solid #ddd;border-radius:10px;background:#fff;font-size:18px;cursor:pointer">Atšaukti</button>
+      <button onclick="saveToken()" style="flex:1;padding:10px;border:none;border-radius:10px;background:#0A2342;color:#fff;font-size:18px;font-weight:700;cursor:pointer">Išsaugoti</button>
     </div>
-    <div id="token-status" style="margin-top:0.6rem;font-size:12px;color:#1A7A4A;min-height:16px"></div>
+    <div id="token-status" style="margin-top:0.6rem;font-size:15px;color:#1A7A4A;min-height:16px"></div>
   </div>
 </div>
 
@@ -326,8 +326,8 @@ body {
 </div>
 <div id="today-krov-block" style="display:none;margin-bottom:1rem;background:#fff;border:2px solid #e0e0e0;border-radius:16px;padding:0.9rem 1.2rem">
   <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.6rem">
-    <span id="today-krov-label" style="font-size:13px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#aaa">ŠIANDIEN KROVINIAI</span>
-    <span id="today-krov-date" style="font-size:13px;font-weight:700;color:#bbb"></span>
+    <span id="today-krov-label" style="font-size:16px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#000">ŠIANDIEN KROVINIAI</span>
+    <span id="today-krov-date" style="font-size:16px;font-weight:700;color:#333"></span>
   </div>
   <div id="today-krov-rows"></div>
 </div>
@@ -350,7 +350,7 @@ body {
     </select>
     <select id="m-year-sel" class="mv-sel" onchange="onMonthSel()"></select>
     <button class="mv-nav" onclick="navMonth(1)">›</button>
-    <span style="color:#8e8e93;font-weight:500;font-size:15px">— mėnesinis vaizdas</span>
+    <span style="color:#111;font-weight:500;font-size:18px">— mėnesinis vaizdas</span>
   </div>
   <div class="rank-grid" id="monthly-cards"></div>
   <div class="chart-legend" id="monthly-legend"></div>
@@ -736,20 +736,20 @@ function renderMonthlySummary(monthlyData, monthLabel) {
 
   const rowsHtml = rows.map(r => `
     <tr>
-      <td style="color:#555;padding:2px 0">${r.label}</td>
+      <td style="color:#111;padding:2px 0">${r.label}</td>
       <td style="text-align:right;font-weight:700;padding:2px 0 2px 12px">${r.val.toLocaleString('lt-LT')} m³</td>
     </tr>`).join('');
 
   el.innerHTML = `<div class="record-card" style="display:flex;flex-direction:column;gap:10px">
     <div style="display:flex;align-items:center;gap:8px">
-      <span style="font-size:22px">📦</span>
+      <span style="font-size:25px">📦</span>
       <div>
-        <div style="font-size:11px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:0.5px">Mėnesio gamyba</div>
-        <div style="font-size:11px;color:#aaa">${monthLabel}</div>
+        <div style="font-size:14px;font-weight:700;color:#111;text-transform:uppercase;letter-spacing:0.5px">Mėnesio gamyba</div>
+        <div style="font-size:14px;color:#000">${monthLabel}</div>
       </div>
     </div>
-    <div style="font-size:26px;font-weight:900;letter-spacing:-0.5px;line-height:1">${totalM3.toLocaleString('lt-LT')} <span style="font-size:14px;font-weight:600;color:#888">m³</span></div>
-    ${rows.length ? `<table style="width:100%;border-collapse:collapse;font-size:13px">${rowsHtml}</table>` : ''}
+    <div style="font-size:29px;font-weight:900;letter-spacing:-0.5px;line-height:1">${totalM3.toLocaleString('lt-LT')} <span style="font-size:17px;font-weight:600;color:#111">m³</span></div>
+    ${rows.length ? `<table style="width:100%;border-collapse:collapse;font-size:16px">${rowsHtml}</table>` : ''}
   </div>`;
 }
 
@@ -1037,9 +1037,9 @@ loadAndRender();
     block.style.display = 'block';
     rowsEl.innerHTML = todayOrders.map(o => `
       <div style="display:flex;align-items:baseline;gap:1rem;padding:0.4rem 0;border-top:1px solid #f0f0f0;flex-wrap:wrap">
-        <span style="font-size:22px;font-weight:900;color:#111;min-width:100px">${o.produktas || '—'}</span>
-        <span style="font-size:16px;font-weight:700;color:#555">${o.transportas || '—'}</span>
-        <span style="font-size:16px;font-weight:600;color:#888">${o.uzsakovas || '—'}</span>
+        <span style="font-size:25px;font-weight:900;color:#111;min-width:100px">${o.produktas || '—'}</span>
+        <span style="font-size:19px;font-weight:700;color:#111">${o.transportas || '—'}</span>
+        <span style="font-size:19px;font-weight:600;color:#111">${o.uzsakovas || '—'}</span>
       </div>`).join('');
   })
   .catch(() => {});
