@@ -741,12 +741,9 @@ function renderMonthlySummary(monthlyData, monthLabel) {
     </tr>`).join('');
 
   el.innerHTML = `<div class="record-card" style="display:flex;flex-direction:column;gap:6px;align-self:stretch">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
-      <span style="font-size:22px">📦</span>
-      <div style="font-size:13px;font-weight:700;color:#111;text-transform:uppercase;letter-spacing:0.5px">Mėnesio gamyba <span style="font-weight:400;text-transform:none;letter-spacing:0">${monthLabel}</span></div>
-    </div>
-    <div style="font-size:32px;font-weight:900;letter-spacing:-0.5px;line-height:1;margin-bottom:4px">${totalM3.toLocaleString('lt-LT')} <span style="font-size:17px;font-weight:600;color:#333">m³</span></div>
-    ${rows.length ? `<table style="width:100%;border-collapse:collapse;font-size:15px;line-height:1.5">${rowsHtml}</table>` : ''}
+    <div style="font-size:12px;font-weight:700;color:#111;text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap">📦 Mėnesio gamyba · <span style="font-weight:500;text-transform:none;letter-spacing:0">${monthLabel}</span></div>
+    <div style="font-size:32px;font-weight:900;letter-spacing:-0.5px;line-height:1;margin-bottom:2px">${totalM3.toLocaleString('lt-LT')} <span style="font-size:17px;font-weight:600;color:#333">m³</span></div>
+    ${rows.length ? `<table style="width:100%;border-collapse:collapse;font-size:18px;line-height:1.6">${rowsHtml}</table>` : ''}
   </div>`;
 }
 
