@@ -331,7 +331,10 @@ body {
   </div>
   <div id="today-krov-rows"></div>
 </div>
-<div class="records-banner" id="records-banner"></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1rem">
+  <div id="records-banner"></div>
+  <div id="monthly-summary-card"></div>
+</div>
 <div class="shift-records-banner" id="shift-records-banner"></div>
 
 <div class="section">
@@ -712,6 +715,44 @@ function renderRecords(data) {
 let PROD_DATA = [];
 let selYear, selMonth;
 
+function renderMonthlySummary(monthlyData, monthLabel) {
+  const el = document.getElementById('monthly-summary-card');
+  if (!el) return;
+  if (!monthlyData.length) { el.innerHTML = ''; return; }
+
+  const totalM3 = monthlyData.reduce((s, d) => s + d.m3, 0);
+  const prdTotals = {};
+  monthlyData.forEach(d => {
+    if (d.prd) Object.keys(d.prd).forEach(k => { prdTotals[k] = (prdTotals[k] || 0) + d.prd[k]; });
+  });
+
+  const PRD_LABELS = {
+    premium: 'Premium', extra: 'Extra', medium: 'Medium',
+    mm01: '0-1mm', silosA: 'Silos A', silosB: 'Silos B', silosC: 'Silos C',
+  };
+  const rows = Object.entries(PRD_LABELS)
+    .map(([k, label]) => ({ label, val: prdTotals[k] || 0 }))
+    .filter(r => r.val > 0);
+
+  const rowsHtml = rows.map(r => `
+    <tr>
+      <td style="color:#555;padding:2px 0">${r.label}</td>
+      <td style="text-align:right;font-weight:700;padding:2px 0 2px 12px">${r.val.toLocaleString('lt-LT')} m³</td>
+    </tr>`).join('');
+
+  el.innerHTML = `<div class="record-card" style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:22px">📦</span>
+      <div>
+        <div style="font-size:11px;font-weight:700;color:#8e8e93;text-transform:uppercase;letter-spacing:0.5px">Mėnesio gamyba</div>
+        <div style="font-size:11px;color:#aaa">${monthLabel}</div>
+      </div>
+    </div>
+    <div style="font-size:26px;font-weight:900;letter-spacing:-0.5px;line-height:1">${totalM3.toLocaleString('lt-LT')} <span style="font-size:14px;font-weight:600;color:#888">m³</span></div>
+    ${rows.length ? `<table style="width:100%;border-collapse:collapse;font-size:13px">${rowsHtml}</table>` : ''}
+  </div>`;
+}
+
 function renderMonthlyView() {
   const now = new Date();
   const isCurrent = (selYear === now.getFullYear() && selMonth === now.getMonth());
@@ -726,6 +767,8 @@ function renderMonthlyView() {
   document.getElementById('m-year-sel').value  = selYear;
   renderCards(monthlyStats, 'monthly-cards');
   renderShiftBarsChart(monthlyData, 'monthly-chart', 'monthly-legend', isCurrent);
+  const monthLabel = MONTH_NAMES[selMonth] + ' ' + selYear;
+  renderMonthlySummary(monthlyData, monthLabel);
 }
 
 function navMonth(dir) {
@@ -821,6 +864,16 @@ async function loadAndRender() {
         const bb    = BB_COLS.reduce((s, k) => s + n(o[k]), 0);
         const raw   = RAW_COLS.reduce((s, k) => s + n(o[k]), 0) || n(o.raw);
 
+        const prd = {
+          premium: n(o['produktas premium m3']) || n(o['premium m3']),
+          extra:   n(o['produktas extra m3'])   || n(o['produktas ekstra m3']) || n(o['extra m3']),
+          medium:  n(o['produktas medium m3'])  || n(o['medium m3']),
+          mm01:    n(o['produktas 0-1mm m3']),
+          silosA:  n(o['produktas a silos m3']) || n(o['a silos m3']),
+          silosB:  n(o['produktas b silos m3']) || n(o['b silos m3']),
+          silosC:  n(o['produktas c silos m3']) || n(o['c silos m3']),
+        };
+
         return {
           date:  o.date  || '',
           shift: parseInt(o['pamaina'] || o['shift']) || 0,
@@ -832,6 +885,7 @@ async function loadAndRender() {
           gas:   n(o['dujos m3'] || o.gas),
           kwh:   n(o['elektra kwh'] || o.kwh),
           raw,
+          prd,
           komentaras: o['komentarai pildytojui'] || '',
         };
       })
@@ -850,6 +904,7 @@ async function loadAndRender() {
         grouped[key].gas   += d.gas;
         grouped[key].kwh   += d.kwh;
         grouped[key].raw   += d.raw;
+        Object.keys(d.prd).forEach(k => { grouped[key].prd[k] += d.prd[k]; });
       }
     });
     const mergedData = Object.values(grouped);
