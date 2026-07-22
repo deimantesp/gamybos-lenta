@@ -450,8 +450,9 @@ function buildStats(periodData, allData) {
       if (r.m3 >= CONFIG.target_m3) streak++;
       else break;
     }
-    const waste = +rows.reduce((a, b) => a + b.waste, 0).toFixed(1);
-    return { shift: s, name: s + ' pamaina', tot, cnt, avg, gasEff, streak, waste };
+    const waste  = +rows.reduce((a, b) => a + b.waste, 0).toFixed(1);
+    const rawKg  = +rows.reduce((a, b) => a + b.raw,   0).toFixed(1);
+    return { shift: s, name: s + ' pamaina', tot, cnt, avg, gasEff, streak, waste, rawKg };
   });
 
   raw.sort((a, b) => b.tot - a.tot);
@@ -488,6 +489,10 @@ function renderCards(stats, containerId) {
         <div class="stat-row">
           <span>Atliekos</span>
           <span class="stat-val">${wasteT} t</span>
+        </div>
+        <div class="stat-row">
+          <span>Žaliava</span>
+          <span class="stat-val">${(s.rawKg/1000).toLocaleString('lt-LT',{minimumFractionDigits:2,maximumFractionDigits:2})} t</span>
         </div>
         ${gapRow}
       </div>`;
