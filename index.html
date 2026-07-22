@@ -452,7 +452,9 @@ function buildStats(periodData, allData) {
     }
     const waste  = +rows.reduce((a, b) => a + b.waste, 0).toFixed(1);
     const rawKg  = +rows.reduce((a, b) => a + b.raw,   0).toFixed(1);
-    return { shift: s, name: s + ' pamaina', tot, cnt, avg, gasEff, streak, waste, rawKg };
+    const rawBrk = {};
+    rows.forEach(r => { if (r.rawBrk) Object.entries(r.rawBrk).forEach(([k,v]) => { rawBrk[k] = (rawBrk[k]||0) + v; }); });
+    return { shift: s, name: s + ' pamaina', tot, cnt, avg, gasEff, streak, waste, rawKg, rawBrk };
   });
 
   raw.sort((a, b) => b.tot - a.tot);
@@ -490,10 +492,11 @@ function renderCards(stats, containerId) {
           <span>Atliekos</span>
           <span class="stat-val">${wasteT} t</span>
         </div>
+        ${Object.entries(s.rawBrk||{}).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
         <div class="stat-row">
-          <span>Žaliava</span>
-          <span class="stat-val">${(s.rawKg/1000).toLocaleString('lt-LT',{minimumFractionDigits:2,maximumFractionDigits:2})} t</span>
-        </div>
+          <span>Žal. ${escapeHtml(k)}</span>
+          <span class="stat-val">${(v/1000).toLocaleString('lt-LT',{minimumFractionDigits:2,maximumFractionDigits:2})} t</span>
+        </div>`).join('')}
         ${gapRow}
       </div>`;
   }).join('');
