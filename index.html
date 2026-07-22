@@ -741,7 +741,7 @@ function renderMonthlySummary(monthlyData, monthLabel) {
     </tr>`).join('');
 
   el.innerHTML = `<div class="record-card" style="display:flex;flex-direction:column;gap:8px;align-self:stretch">
-    <div style="font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+    <div style="font-size:20px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
       📦 Mėnesio gamyba · ${monthLabel} — ${totalM3.toLocaleString('lt-LT')} m³
     </div>
     ${rows.length ? `<table style="width:100%;border-collapse:collapse;font-size:20px;line-height:1.7">${rowsHtml}</table>` : ''}
