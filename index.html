@@ -469,8 +469,9 @@ function renderCards(stats, containerId) {
     const streakClass = s.streak >= 5 ? 'gold' : (s.streak >= 3 ? 'good' : '');
     const medalHtml   = s.rank === 1 ? '<span class="card-medal">🥇</span>' : '';
     const gapRow = s.rank > 1
-      ? `<div class="stat-row"><span>Trūksta iki ${s.rank - 1} v.</span><span class="stat-val bad">−${s.gapToNext} m³</span></div>`
+      ? `<div class="stat-row"><span>Trūksta iki ${s.rank - 1} v.</span><span class="stat-val bad">−${s.gapToNext.toFixed(2)} m³</span></div>`
       : '';
+    const wasteT = (s.waste / 1000).toLocaleString('lt-LT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     return `
       <div class="rank-card" data-rank="${s.rank}" data-onplan="${onPlan}">
         <div class="card-top">
@@ -486,13 +487,9 @@ function renderCards(stats, containerId) {
         </div>
         <div class="stat-row">
           <span>Atliekos</span>
-          <span class="stat-val">${s.waste} m³</span>
+          <span class="stat-val">${wasteT} t</span>
         </div>
         ${gapRow}
-        <div class="stat-row">
-          <span>Serija</span>
-          <span class="stat-val ${streakClass}">${s.streak} pam.</span>
-        </div>
       </div>`;
   }).join('');
 }
