@@ -827,26 +827,34 @@ async function loadAndRender() {
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     const text = await resp.text();
     const rows = parseCSV(text).filter(r => r.some(c => c.trim() !== ''));
-    const headers = rows[0].map(h => h.trim().toLowerCase());
+    // Normalizuoti header'iai: ž→z, "0-1 mm"→"0-1mm" (pašalina dublikatus ir LT simbolių neatitikimus)
+    const normalizeH = h => h.trim().toLowerCase()
+      .replace(/ž/g, 'z').replace(/š/g, 's').replace(/č/g, 'c').replace(/ė/g, 'e').replace(/ų/g, 'u').replace(/ū/g, 'u').replace(/į/g, 'i').replace(/ą/g, 'a')
+      .replace(/0-1\s+mm/g, '0-1mm');
+    const headers = rows[0].map(normalizeH);
 
     // Auto-detektavimas pagal pavadinimų šabloną — nauji stulpeliai veikia automatiškai
     const M3_COLS    = [
-      ...headers.filter(h => /^produktas .+ m3$/.test(h)),
-      // seni stulpelių pavadinimai (suderinamumas):
-      'premium m3','medium m3','extra m3','a silos m3','b silos m3','c silos m3',
+      ...new Set([
+        ...headers.filter(h => /^produktas .+ m3$/.test(h)),
+        // seni stulpelių pavadinimai (suderinamumas):
+        'premium m3','medium m3','extra m3','a silos m3','b silos m3','c silos m3',
+      ])
     ];
     const BB_COLS    = [
-      ...headers.filter(h => /^produktas .+ bb$/.test(h)),
-      'd bb','d bb kg',
+      ...new Set([
+        ...headers.filter(h => /^produktas .+ bb$/.test(h)),
+        'd bb','d bb kg',
+      ])
     ];
     const WASTE_COLS = ['krituliai','krit','fines','e bb','e bb kg','e maisai'];
-    const RAW_COLS   = headers.filter(h => /zaliava kg$/.test(h));
+    const RAW_COLS   = [...new Set(headers.filter(h => /zaliava kg$/.test(h)))];
 
-    // Unikalūs produktų pavadinimai iš stulpelių (dinamiškai)
+    // Unikalūs produktų pavadinimai iš stulpelių (dinamiškai), be "tankis"
     const PRODUCT_NAMES = [...new Set(
       headers
-        .filter(h => h.startsWith('produktas '))
-        .map(h => h.replace(/^produktas /, '').replace(/ (m3|bb|kg|tankis)$/, '').trim())
+        .filter(h => /^produktas .+ m3$/.test(h))
+        .map(h => h.replace(/^produktas /, '').replace(/ m3$/, '').trim())
     )];
 
     const n = v => parseFloat(String(v || '').replace(',', '.')) || 0;
