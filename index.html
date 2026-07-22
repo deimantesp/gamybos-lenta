@@ -723,13 +723,10 @@ function renderMonthlySummary(monthlyData, monthLabel) {
     if (d.prd) Object.keys(d.prd).forEach(k => { prdTotals[k] = (prdTotals[k] || 0) + d.prd[k]; });
   });
 
-  const PRD_LABELS = {
-    premium: 'Premium', extra: 'Extra', medium: 'Medium',
-    mm01: '0-1mm', silosA: 'Silos A', silosB: 'Silos B', silosC: 'Silos C',
-  };
-  const rows = Object.entries(PRD_LABELS)
-    .map(([k, label]) => ({ label, val: prdTotals[k] || 0 }))
-    .filter(r => r.val > 0);
+  const capitalize = s => s.charAt(0).toUpperCase() + s.slice(1);
+  const rows = Object.entries(prdTotals)
+    .filter(([, v]) => v > 0)
+    .map(([k, val]) => ({ label: capitalize(k), val }));
 
   const rowsHtml = rows.map(r => `
     <tr>
@@ -832,16 +829,25 @@ async function loadAndRender() {
     const rows = parseCSV(text).filter(r => r.some(c => c.trim() !== ''));
     const headers = rows[0].map(h => h.trim().toLowerCase());
 
-    const M3_COLS    = ['produktas premium m3','produktas extra m3','produktas ekstra m3',
-                        'produktas medium m3','produktas 0-1mm m3',
-                        'produktas a silos m3','produktas b silos m3','produktas c silos m3',
-                        // senų stulpelių suderinamumas:
-                        'premium m3','medium m3','extra m3','a silos m3','b silos m3','c silos m3'];
-    const BB_COLS    = ['produktas premium bb','produktas extra bb','produktas ekstra bb',
-                        'produktas medium bb','produktas 0-1mm bb','d bb','d bb kg'];
+    // Auto-detektavimas pagal pavadinimų šabloną — nauji stulpeliai veikia automatiškai
+    const M3_COLS    = [
+      ...headers.filter(h => /^produktas .+ m3$/.test(h)),
+      // seni stulpelių pavadinimai (suderinamumas):
+      'premium m3','medium m3','extra m3','a silos m3','b silos m3','c silos m3',
+    ];
+    const BB_COLS    = [
+      ...headers.filter(h => /^produktas .+ bb$/.test(h)),
+      'd bb','d bb kg',
+    ];
     const WASTE_COLS = ['krituliai','krit','fines','e bb','e bb kg','e maisai'];
-    const RAW_COLS   = ['0 zaliava kg','1 zaliava kg','2 zaliava kg','9 zaliava kg','x zaliava kg',
-                        '3 zaliava kg','4 zaliava kg'];
+    const RAW_COLS   = headers.filter(h => /zaliava kg$/.test(h));
+
+    // Unikalūs produktų pavadinimai iš stulpelių (dinamiškai)
+    const PRODUCT_NAMES = [...new Set(
+      headers
+        .filter(h => h.startsWith('produktas '))
+        .map(h => h.replace(/^produktas /, '').replace(/ (m3|bb|kg|tankis)$/, '').trim())
+    )];
 
     const n = v => parseFloat(String(v || '').replace(',', '.')) || 0;
 
@@ -856,15 +862,12 @@ async function loadAndRender() {
         const bb    = BB_COLS.reduce((s, k) => s + n(o[k]), 0);
         const raw   = RAW_COLS.reduce((s, k) => s + n(o[k]), 0) || n(o.raw);
 
-        const prd = {
-          premium: n(o['produktas premium m3']) || n(o['premium m3']),
-          extra:   n(o['produktas extra m3'])   || n(o['produktas ekstra m3']) || n(o['extra m3']),
-          medium:  n(o['produktas medium m3'])  || n(o['medium m3']),
-          mm01:    n(o['produktas 0-1mm m3']),
-          silosA:  n(o['produktas a silos m3']) || n(o['a silos m3']),
-          silosB:  n(o['produktas b silos m3']) || n(o['b silos m3']),
-          silosC:  n(o['produktas c silos m3']) || n(o['c silos m3']),
-        };
+        // Dinamiškas m3 per produktą
+        const prd = {};
+        PRODUCT_NAMES.forEach(name => {
+          const val = n(o[`produktas ${name} m3`]) || n(o[`${name} m3`]);
+          if (val) prd[name] = val;
+        });
 
         return {
           date:  o.date  || '',
@@ -896,7 +899,7 @@ async function loadAndRender() {
         grouped[key].gas   += d.gas;
         grouped[key].kwh   += d.kwh;
         grouped[key].raw   += d.raw;
-        Object.keys(d.prd).forEach(k => { grouped[key].prd[k] += d.prd[k]; });
+        Object.keys(d.prd).forEach(k => { grouped[key].prd[k] = (grouped[key].prd[k] || 0) + d.prd[k]; });
       }
     });
     const mergedData = Object.values(grouped);
