@@ -324,16 +324,16 @@ body {
   </div>
   <button id="pranesimas-clear" style="display:none" onclick="pranesClear(event)" title="Ištrinti">×</button>
 </div>
-<div id="today-krov-block" style="display:none;margin-bottom:1rem;background:#fff;border:2px solid #e0e0e0;border-radius:16px;padding:0.9rem 1.2rem">
-  <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.6rem">
-    <span id="today-krov-label" style="font-size:16px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#000">ŠIANDIEN KROVINIAI</span>
-    <span id="today-krov-date" style="font-size:16px;font-weight:700;color:#333"></span>
+<div id="records-banner" style="margin-bottom:1rem"></div>
+<div style="display:flex;gap:1.25rem;margin-bottom:1rem;align-items:stretch">
+  <div id="today-krov-block" style="display:none;flex:1;background:#fff;border:2px solid #e0e0e0;border-radius:16px;padding:0.9rem 1.2rem">
+    <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.6rem">
+      <span id="today-krov-label" style="font-size:16px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#000">ŠIANDIEN KROVINIAI</span>
+      <span id="today-krov-date" style="font-size:16px;font-weight:700;color:#333"></span>
+    </div>
+    <div id="today-krov-rows"></div>
   </div>
-  <div id="today-krov-rows"></div>
-</div>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1rem">
-  <div id="records-banner"></div>
-  <div id="monthly-summary-card"></div>
+  <div id="monthly-summary-card" style="flex:1"></div>
 </div>
 <div class="shift-records-banner" id="shift-records-banner"></div>
 
