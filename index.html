@@ -1022,7 +1022,7 @@ loadAndRender();
       .map(v => ({
         produktas:   (v[4] || '').trim(),
         uzsakovas:   (v[5] || '').trim(),
-        transportas: (v[8] || '').trim(),
+        auto_info:   (v[9] || '').trim(),
       }));
     if (!todayOrders.length) return;
 
@@ -1030,7 +1030,7 @@ loadAndRender();
     rowsEl.innerHTML = todayOrders.map(o => `
       <div style="display:flex;align-items:baseline;gap:1rem;padding:0.4rem 0;border-top:1px solid #f0f0f0;flex-wrap:wrap">
         <span style="font-size:25px;font-weight:900;color:#111;min-width:100px">${o.produktas || '—'}</span>
-        <span style="font-size:19px;font-weight:700;color:#111">${o.transportas || '—'}</span>
+        <span style="font-size:19px;font-weight:700;color:#111">${o.auto_info || '—'}</span>
         <span style="font-size:19px;font-weight:600;color:#111">${o.uzsakovas || '—'}</span>
       </div>`).join('');
   })
