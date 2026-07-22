@@ -1007,6 +1007,26 @@ loadAndRender();
   const token = localStorage.getItem('po_secret');
   if (!token) return;
 
+  const CACHE_KEY = 'krov_cache_' + today;
+
+  function renderOrders(orders) {
+    if (!orders.length) return;
+    block.style.display = 'block';
+    rowsEl.innerHTML = orders.map(o => `
+      <div style="display:flex;align-items:baseline;gap:1rem;padding:0.4rem 0;border-top:1px solid #f0f0f0;flex-wrap:wrap">
+        <span style="font-size:25px;font-weight:900;color:#111;min-width:100px">${o.produktas || '—'}</span>
+        <span style="font-size:19px;font-weight:700;color:#111">${o.auto_info || '—'}</span>
+        <span style="font-size:19px;font-weight:600;color:#111">${o.uzsakovas || '—'}</span>
+      </div>`).join('');
+  }
+
+  // Rodyti kešą akimirksniu
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) renderOrders(JSON.parse(cached));
+  } catch (_) {}
+
+  // Fone pakrauti šviežius duomenis
   fetch(ENDPOINT, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1016,7 +1036,7 @@ loadAndRender();
   .then(out => {
     if (!out.ok || !out.csv) return;
     const rows = parseSimpleCSV(out.csv);
-    const todayOrders = rows
+    const orders = rows
       .slice(1)
       .filter(v => /^\d+$/.test((v[0]||'').trim()) && (v[5]||'').trim() && (v[2]||'').trim() === today)
       .map(v => ({
@@ -1024,15 +1044,10 @@ loadAndRender();
         uzsakovas:   (v[5] || '').trim(),
         auto_info:   (v[9] || '').trim(),
       }));
-    if (!todayOrders.length) return;
-
-    block.style.display = 'block';
-    rowsEl.innerHTML = todayOrders.map(o => `
-      <div style="display:flex;align-items:baseline;gap:1rem;padding:0.4rem 0;border-top:1px solid #f0f0f0;flex-wrap:wrap">
-        <span style="font-size:25px;font-weight:900;color:#111;min-width:100px">${o.produktas || '—'}</span>
-        <span style="font-size:19px;font-weight:700;color:#111">${o.auto_info || '—'}</span>
-        <span style="font-size:19px;font-weight:600;color:#111">${o.uzsakovas || '—'}</span>
-      </div>`).join('');
+    // Išvalyti senus kešus (kitos dienos)
+    Object.keys(localStorage).filter(k => k.startsWith('krov_cache_') && k !== CACHE_KEY).forEach(k => localStorage.removeItem(k));
+    localStorage.setItem(CACHE_KEY, JSON.stringify(orders));
+    renderOrders(orders);
   })
   .catch(() => {});
 })();
