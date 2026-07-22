@@ -463,6 +463,8 @@ function buildStats(periodData, allData) {
     r.rank = i + 1;
     r.gapToNext = i > 0 ? raw[i - 1].tot - r.tot : 0;
   });
+  const byAvg = [...raw].sort((a, b) => b.avg - a.avg);
+  byAvg.forEach((r, i) => { r.avgRank = i + 1; });
   return raw;
 }
 
@@ -490,7 +492,7 @@ function renderCards(stats, containerId) {
           <span class="stat-val">${s.days} d.</span>
         </div>
         <div class="stat-row">
-          <span>Vid. / pamainai</span>
+          <span>Vid. / pamainai <span style="display:inline-block;font-size:11px;font-weight:800;background:${s.avgRank===1?'#C47A00':s.avgRank===2?'#888':s.avgRank===3?'#a05c00':'#bbb'};color:#fff;border-radius:4px;padding:1px 5px;vertical-align:middle;margin-left:3px">${s.avgRank}v</span></span>
           <span class="stat-val ${avgClass}">${s.avg} m³</span>
         </div>
         <div class="stat-row">
