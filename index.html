@@ -454,7 +454,8 @@ function buildStats(periodData, allData) {
     const rawKg  = +rows.reduce((a, b) => a + b.raw,   0).toFixed(1);
     const rawBrk = {};
     rows.forEach(r => { if (r.rawBrk) Object.entries(r.rawBrk).forEach(([k,v]) => { rawBrk[k] = (rawBrk[k]||0) + v; }); });
-    return { shift: s, name: s + ' pamaina', tot, cnt, avg, gasEff, streak, waste, rawKg, rawBrk };
+    const days = new Set(rows.map(r => r.date)).size;
+    return { shift: s, name: s + ' pamaina', tot, cnt, avg, gasEff, streak, waste, rawKg, rawBrk, days };
   });
 
   raw.sort((a, b) => b.tot - a.tot);
@@ -484,6 +485,10 @@ function renderCards(stats, containerId) {
         <p class="card-name">${s.name}</p>
         <p class="card-total" data-rank="${s.rank}">${s.tot.toLocaleString('lt-LT')}</p>
         <p class="card-unit">m³ šiuo laikotarpiu</p>
+        <div class="stat-row">
+          <span>Darbo dienos</span>
+          <span class="stat-val">${s.days} d.</span>
+        </div>
         <div class="stat-row">
           <span>Vid. / pamainai</span>
           <span class="stat-val ${avgClass}">${s.avg} m³</span>
