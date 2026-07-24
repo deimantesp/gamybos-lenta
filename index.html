@@ -92,8 +92,9 @@ body {
 .rank-card[data-onplan="false"] { background: #fce9e7; border-color: #C0392B; }
 .card-top {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: flex-start;
+  gap: 0.5rem;
 }
 .rank-badge {
   font-size: 20px;
@@ -152,9 +153,6 @@ body {
 }
 .chart-wrap { position: relative; height: 240px; }
 .records-banner {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.6rem;
   margin-bottom: 0.6rem;
 }
 .shift-records-banner {
@@ -729,7 +727,7 @@ function renderMonthlySummary(monthlyData, monthLabel) {
     <div style="font-size:20px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
       📦 Mėnesio gamyba · ${monthLabel} — ${totalM3.toLocaleString('lt-LT')} m³
     </div>
-    ${prdRows ? `<table style="width:100%;border-collapse:collapse;font-size:20px;line-height:1.7">${prdRows}</table>` : ''}
+    ${prdRows ? `<table style="border-collapse:collapse;font-size:20px;line-height:1.7">${prdRows}</table>` : ''}
     ${totalRaw > 0 ? `<div style="font-size:18px;font-weight:700;color:#444;margin-top:4px;border-top:1px solid #eee;padding-top:6px">
       🪨 Žaliava: ${totalRaw.toLocaleString('lt-LT')} kg
     </div>` : ''}
