@@ -460,13 +460,11 @@ function buildStats(periodData, allData) {
     return { shift: s, name: s + ' pamaina', tot, cnt, avg, gasEff, streak, waste, rawKg, rawBrk, days };
   });
 
-  raw.sort((a, b) => b.tot - a.tot);
+  raw.sort((a, b) => b.avg - a.avg);
   raw.forEach((r, i) => {
     r.rank = i + 1;
-    r.gapToNext = i > 0 ? raw[i - 1].tot - r.tot : 0;
+    r.gapToNext = i > 0 ? raw[i - 1].avg - r.avg : 0;
   });
-  const byAvg = [...raw].sort((a, b) => b.avg - a.avg);
-  byAvg.forEach((r, i) => { r.avgRank = i + 1; });
   return raw;
 }
 
@@ -487,15 +485,15 @@ function renderCards(stats, containerId) {
           ${medalHtml}
         </div>
         <p class="card-name">${s.name}</p>
-        <p class="card-total" data-rank="${s.rank}">${s.tot.toLocaleString('lt-LT')}</p>
-        <p class="card-unit">m³ šiuo laikotarpiu</p>
+        <p class="card-total" data-rank="${s.rank}">${s.avg}</p>
+        <p class="card-unit">m³ / pamainai (vid.)</p>
         <div class="stat-row">
           <span>Darbo dienos</span>
           <span class="stat-val">${s.days} d.</span>
         </div>
         <div class="stat-row">
-          <span>Vid. / pamainai <span style="display:inline-block;font-size:11px;font-weight:800;background:${s.avgRank===1?'#C47A00':s.avgRank===2?'#888':s.avgRank===3?'#a05c00':'#bbb'};color:#fff;border-radius:4px;padding:1px 5px;vertical-align:middle;margin-left:3px">${s.avgRank}v</span></span>
-          <span class="stat-val ${avgClass}">${s.avg} m³</span>
+          <span>Bendra m³</span>
+          <span class="stat-val">${s.tot.toLocaleString('lt-LT')} m³</span>
         </div>
         <div class="stat-row">
           <span>Atliekos</span>
