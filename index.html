@@ -494,9 +494,11 @@ function renderCards(stats, containerId) {
     const avgClass    = onPlan ? 'good' : 'bad';
     const streakClass = s.streak >= 5 ? 'gold' : (s.streak >= 3 ? 'good' : '');
     const medalHtml   = s.rank === 1 ? '<span class="card-medal">🥇</span>' : '';
-    const gapRow = s.rank > 1
-      ? `<div class="stat-row"><span>Trūksta iki ${s.rank - 1} v.</span><span class="stat-val bad">−${s.gapToNext.toFixed(2)} m³</span></div>`
-      : '';
+    const targetSoFar = s.days * CONFIG.target_m3;
+    const gapToTarget = targetSoFar - s.tot;
+    const gapRow = gapToTarget > 0
+      ? `<div class="stat-row"><span>Trūksta iki tikslo</span><span class="stat-val bad">−${gapToTarget.toLocaleString('lt-LT', {maximumFractionDigits:1})} m³</span></div>`
+      : `<div class="stat-row"><span>Viršija tikslą</span><span class="stat-val good">+${Math.abs(gapToTarget).toLocaleString('lt-LT', {maximumFractionDigits:1})} m³</span></div>`;
     const wasteT = (s.waste / 1000).toLocaleString('lt-LT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     return `
       <div class="rank-card" data-rank="${s.rank}" data-onplan="${onPlan}">
