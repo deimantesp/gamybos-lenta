@@ -198,16 +198,16 @@ body {
 /* ── PRANEŠIMAS ── */
 @keyframes blinkLabel { 0%,100%{opacity:1} 50%{opacity:0.2} }
 #pranesimas-banner {
-  margin-bottom: 0.6rem;
-  border-radius: 16px;
+  margin-bottom: 0.4rem;
+  border-radius: 10px;
   background: #f5f5f7;
   border: 2px solid #e0e0e0;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  min-height: 44px;
+  gap: 0.75rem;
+  min-height: 34px;
   cursor: pointer;
-  padding: 0.4rem 1rem;
+  padding: 0.2rem 0.9rem;
 }
 #pranesimas-banner:hover { border-color:#333; }
 #pranesimas-label {
@@ -327,7 +327,7 @@ body {
   <button id="pranesimas-clear" style="display:none" onclick="pranesClear(event)" title="Ištrinti">×</button>
 </div>
 <div id="records-banner" style="margin-bottom:0.4rem"></div>
-<div style="display:flex;gap:0.5rem;margin-bottom:0.4rem;align-items:stretch">
+<div style="display:flex;gap:0.5rem;margin-bottom:0.4rem;align-items:flex-start">
   <div id="today-krov-block" style="display:none;flex:1;background:#fff;border:2px solid #e0e0e0;border-radius:16px;padding:0.45rem 0.75rem">
     <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.25rem">
       <span id="today-krov-label" style="font-size:16px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#000">ŠIANDIEN KROVINIAI</span>
@@ -687,12 +687,13 @@ function renderRecords(data) {
 
   let html = '';
   if (maxRec) {
-    html += `<div style="background:white;border-radius:10px;padding:0.25rem 0.75rem;display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap">
-      <span style="font-size:18px">🏆</span>
-      <span style="font-size:15px;font-weight:700;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px">Rekordas</span>
-      <span style="font-size:20px;font-weight:900;color:#C47A00">${maxRec.m3.toLocaleString('lt-LT')} m³</span>
-      ${shiftBadge(maxRec.shift)}
-      <span style="font-size:15px;color:#555">· ${fmtDate(maxRec.date)}</span>
+    html += `<div class="record-card rec-max">
+      <div class="record-icon">🏆</div>
+      <div class="record-body">
+        <div class="record-label">Daugiausiai per pamainą · 1 pečius</div>
+        <div class="record-value">${maxRec.m3.toLocaleString('lt-LT')} m³</div>
+        <div class="record-meta">${shiftBadge(maxRec.shift)} · ${fmtDate(maxRec.date)}</div>
+      </div>
     </div>`;
   }
   document.getElementById('records-banner').innerHTML = html;
