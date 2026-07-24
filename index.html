@@ -356,13 +356,13 @@ body {
   </div>
   <div class="rank-grid" id="monthly-cards"></div>
   <div class="chart-legend" id="monthly-legend"></div>
-  <div class="chart-wrap" style="height:180px"><canvas id="monthly-chart"></canvas></div>
+  <div class="chart-wrap" style="height:130px"><canvas id="monthly-chart"></canvas></div>
 </div>
 
 <div class="section yearly-section" style="margin-top:0.6rem;">
   <h2 class="section-title" id="yearly-title">Metinis vaizdas</h2>
   <div class="chart-legend" id="yearly-legend"></div>
-  <div class="chart-wrap" style="height:150px;"><canvas id="yearly-chart"></canvas></div>
+  <div class="chart-wrap" style="height:110px;"><canvas id="yearly-chart"></canvas></div>
 </div>
 
 <p class="status-bar" id="status-bar"></p>
@@ -486,21 +486,9 @@ function renderCards(stats, containerId) {
         <p class="card-name">${s.name}</p>
         <p class="card-total" data-rank="${s.rank}">${s.avg}</p>
         <p class="card-unit">m³ / pamainai (vid.)</p>
-        <div class="stat-row">
-          <span>Darbo dienos</span>
-          <span class="stat-val">${s.days} d.</span>
-        </div>
-        <div class="stat-row">
-          <span>Bendra m³</span>
-          <span class="stat-val">${s.tot.toLocaleString('lt-LT')} m³</span>
-        </div>
-        <div class="stat-row">
-          <span>Atliekos</span>
-          <span class="stat-val">${wasteT} t</span>
-        </div>
-        <div class="stat-row">
-          <span>Žaliava</span>
-          <span class="stat-val">${(s.rawKg/1000).toLocaleString('lt-LT',{minimumFractionDigits:2,maximumFractionDigits:2})} t</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:3px">
+          <div class="stat-row"><span>Dienos</span><span class="stat-val">${s.days} d.</span></div>
+          <div class="stat-row"><span>Viso m³</span><span class="stat-val">${s.tot.toLocaleString('lt-LT')}</span></div>
         </div>
         ${gapRow}
       </div>`;
@@ -699,13 +687,12 @@ function renderRecords(data) {
 
   let html = '';
   if (maxRec) {
-    html += `<div class="record-card rec-max">
-      <div class="record-icon">🏆</div>
-      <div class="record-body">
-        <div class="record-label">Daugiausiai per pamainą · 1 pečius</div>
-        <div class="record-value">${maxRec.m3.toLocaleString('lt-LT')} m³</div>
-        <div class="record-meta">${shiftBadge(maxRec.shift)} · ${fmtDate(maxRec.date)}</div>
-      </div>
+    html += `<div style="background:white;border-radius:10px;padding:0.25rem 0.75rem;display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap">
+      <span style="font-size:18px">🏆</span>
+      <span style="font-size:15px;font-weight:700;color:#6e6e73;text-transform:uppercase;letter-spacing:0.5px">Rekordas</span>
+      <span style="font-size:20px;font-weight:900;color:#C47A00">${maxRec.m3.toLocaleString('lt-LT')} m³</span>
+      ${shiftBadge(maxRec.shift)}
+      <span style="font-size:15px;color:#555">· ${fmtDate(maxRec.date)}</span>
     </div>`;
   }
   document.getElementById('records-banner').innerHTML = html;
@@ -1037,7 +1024,7 @@ loadAndRender();
     if (!orders.length) return;
     block.style.display = 'block';
     rowsEl.innerHTML = orders.map(o => `
-      <div style="display:flex;align-items:baseline;gap:1rem;padding:0.4rem 0;border-top:1px solid #f0f0f0;flex-wrap:wrap">
+      <div style="display:flex;align-items:baseline;gap:0.75rem;padding:0.15rem 0;border-top:1px solid #f0f0f0;flex-wrap:wrap">
         <span style="font-size:25px;font-weight:900;color:#111;min-width:100px">${o.produktas || '—'}</span>
         <span style="font-size:19px;font-weight:700;color:#111">${o.auto_info || '—'}</span>
         <span style="font-size:19px;font-weight:600;color:#111">${o.uzsakovas || '—'}</span>
