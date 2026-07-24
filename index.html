@@ -277,9 +277,29 @@ body {
   z-index: 99;
 }
 #loading-overlay.visible { display: flex; }
+/* ── AUTH GATE ── */
+#auth-gate { position:fixed;inset:0;background:#111;display:none;align-items:center;justify-content:center;z-index:9999; }
+#auth-gate.show { display:flex; }
+.auth-box { background:#fff;border-radius:16px;padding:32px 28px;width:100%;max-width:360px;text-align:center; }
+.auth-box h2 { font-size:22px;font-weight:900;margin:0 0 6px; }
+.auth-box p { font-size:14px;color:#666;margin:0 0 18px; }
+.auth-box input { width:100%;font-family:inherit;font-size:16px;padding:12px 14px;border:1.5px solid #ddd;border-radius:10px;outline:none;margin-bottom:12px;box-sizing:border-box; }
+.auth-box input:focus { border-color:#1a6e2e; }
+.auth-box button { width:100%;font-family:inherit;font-size:16px;font-weight:700;padding:12px;border:none;border-radius:10px;background:#1a6e2e;color:#fff;cursor:pointer; }
+.auth-box button:hover { background:#155824; }
+#auth-err { font-size:13px;color:#C0392B;font-weight:600;min-height:18px;margin-top:10px; }
 </style>
 </head>
 <body>
+<div id="auth-gate">
+  <div class="auth-box">
+    <h2>🏭 Pamainos lenktynės</h2>
+    <p>Įvesk prieigos slaptažodį</p>
+    <input type="password" id="auth-pwd" autocomplete="current-password" placeholder="Slaptažodis">
+    <button id="auth-submit">Įeiti</button>
+    <div id="auth-err"></div>
+  </div>
+</div>
 
 <a href="https://perliprof.github.io/" style="position:fixed;top:12px;left:12px;z-index:9999;background:rgba(0,0,0,0.35);color:#fff;font-family:inherit;font-size:13px;font-weight:700;padding:7px 14px;border-radius:10px;text-decoration:none;backdrop-filter:blur(6px)">← Hub</a>
 
@@ -926,8 +946,6 @@ async function loadAndRender() {
   document.getElementById('loading-overlay').classList.remove('visible');
 }
 
-loadAndRender();
-
 /* ── PRANEŠIMAS ── */
 (function() {
   const KEY   = 'gb_pranesimas';
@@ -1087,6 +1105,30 @@ document.getElementById('token-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') saveToken();
   if (e.key === 'Escape') closeTokenDlg();
 });
+/* ── AUTH ── */
+const GAM_PWD = 'lenta26';
+// GAM_PWD is a deterrent — source data is a public CSV; this only blocks casual visitors
+function gamAuthOk() { return localStorage.getItem('gam_secret') === GAM_PWD; }
+function showGate(msg) {
+  document.getElementById('auth-gate').classList.add('show');
+  document.getElementById('auth-err').textContent = msg || '';
+  document.getElementById('auth-pwd').value = '';
+  document.getElementById('auth-pwd').focus();
+}
+document.getElementById('auth-submit').onclick = function() {
+  const v = document.getElementById('auth-pwd').value.trim();
+  if (v === GAM_PWD) {
+    localStorage.setItem('gam_secret', GAM_PWD);
+    document.getElementById('auth-gate').classList.remove('show');
+    loadAndRender();
+  } else {
+    document.getElementById('auth-err').textContent = 'Neteisingas slaptažodis.';
+  }
+};
+document.getElementById('auth-pwd').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('auth-submit').click();
+});
+if (gamAuthOk()) { loadAndRender(); } else { showGate(); }
 </script>
 </body>
 </html>
