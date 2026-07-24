@@ -38,7 +38,7 @@ body {
 .month-box {
   background: white;
   border-radius: 12px;
-  padding: 10px 18px;
+  padding: 5px 12px;
   text-align: right;
   white-space: nowrap;
   flex-shrink: 0;
@@ -262,8 +262,8 @@ body {
   text-align: center;
   font-size: 16px;
   color:#444;
-  margin-top: 1rem;
-  padding-bottom: 0.5rem;
+  margin-top: 0.3rem;
+  padding-bottom: 0.2rem;
 }
 .status-bar.error { color: #C0392B; }
 #loading-overlay {
@@ -288,8 +288,8 @@ body {
 <div id="loading-overlay">Kraunami duomenys…</div>
 
 <div class="page-header">
-  <div style="display:flex;align-items:center;gap:1rem">
-    <img src="logo.png" alt="Perliprof" style="height:80px;width:auto">
+  <div style="display:flex;align-items:center;gap:0.6rem">
+    <img src="logo.png" alt="Perliprof" style="height:48px;width:auto">
     <h1 class="page-title">Pamainos lenktynės</h1>
     <p class="page-meta">Tikslas: <strong>120 m³</strong> / pamaina &nbsp;·&nbsp; Aukso zona: <strong>135+ m³</strong></p>
   </div>
@@ -326,10 +326,10 @@ body {
   </div>
   <button id="pranesimas-clear" style="display:none" onclick="pranesClear(event)" title="Ištrinti">×</button>
 </div>
-<div id="records-banner" style="margin-bottom:1rem"></div>
-<div style="display:flex;gap:1.25rem;margin-bottom:1rem;align-items:stretch">
-  <div id="today-krov-block" style="display:none;flex:1;background:#fff;border:2px solid #e0e0e0;border-radius:16px;padding:0.9rem 1.2rem">
-    <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.6rem">
+<div id="records-banner" style="margin-bottom:0.4rem"></div>
+<div style="display:flex;gap:0.5rem;margin-bottom:0.4rem;align-items:stretch">
+  <div id="today-krov-block" style="display:none;flex:1;background:#fff;border:2px solid #e0e0e0;border-radius:16px;padding:0.45rem 0.75rem">
+    <div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:0.25rem">
       <span id="today-krov-label" style="font-size:16px;font-weight:900;letter-spacing:3px;text-transform:uppercase;color:#000">ŠIANDIEN KROVINIAI</span>
       <span id="today-krov-date" style="font-size:16px;font-weight:700;color:#333"></span>
     </div>
@@ -362,7 +362,7 @@ body {
 <div class="section yearly-section" style="margin-top:0.6rem;">
   <h2 class="section-title" id="yearly-title">Metinis vaizdas</h2>
   <div class="chart-legend" id="yearly-legend"></div>
-  <div class="chart-wrap" style="height:260px;"><canvas id="yearly-chart"></canvas></div>
+  <div class="chart-wrap" style="height:150px;"><canvas id="yearly-chart"></canvas></div>
 </div>
 
 <p class="status-bar" id="status-bar"></p>
