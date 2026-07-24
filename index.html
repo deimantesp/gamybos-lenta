@@ -1078,12 +1078,18 @@ async function loadAndRender() {
   function renderOrders(orders) {
     if (!orders.length) return;
     block.style.display = 'block';
-    rowsEl.innerHTML = orders.map(o => `
-      <div style="display:flex;align-items:baseline;gap:0.75rem;padding:0.15rem 0;border-top:1px solid #f0f0f0;flex-wrap:wrap">
-        <span style="font-size:25px;font-weight:900;color:#111;min-width:100px">${o.produktas || '—'}</span>
-        <span style="font-size:19px;font-weight:700;color:#111">${o.auto_info || '—'}</span>
-        <span style="font-size:19px;font-weight:600;color:#111">${o.uzsakovas || '—'}</span>
-      </div>`).join('');
+    rowsEl.innerHTML = orders.map(o => {
+      const done = o.busena === 'Įvykdyta' || o.busena === 'Pristatyta';
+      const clr = done ? '#aaa' : '#111';
+      const wgt1 = done ? '600' : '900';
+      const wgt2 = done ? '500' : '700';
+      const wgt3 = done ? '400' : '600';
+      return `<div style="display:flex;align-items:baseline;gap:0.75rem;padding:0.15rem 0;border-top:1px solid #f0f0f0;flex-wrap:wrap${done ? ';opacity:0.5' : ''}">
+        <span style="font-size:25px;font-weight:${wgt1};color:${clr};min-width:100px">${o.produktas || '—'}</span>
+        <span style="font-size:19px;font-weight:${wgt2};color:${clr}">${o.auto_info || '—'}</span>
+        <span style="font-size:19px;font-weight:${wgt3};color:${clr}">${o.uzsakovas || '—'}</span>
+      </div>`;
+    }).join('');
   }
 
   // Rodyti kešą akimirksniu
@@ -1109,6 +1115,7 @@ async function loadAndRender() {
         produktas:   (v[4] || '').trim(),
         uzsakovas:   (v[5] || '').trim(),
         auto_info:   (v[9] || '').trim(),
+        busena:      (v[7] || '').trim(),
       }));
     // Išvalyti senus kešus (kitos dienos)
     Object.keys(localStorage).filter(k => k.startsWith('krov_cache_') && k !== CACHE_KEY).forEach(k => localStorage.removeItem(k));
