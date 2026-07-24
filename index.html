@@ -356,6 +356,7 @@ body {
     <div id="today-krov-rows"></div>
   </div>
   <div id="monthly-summary-card" style="flex:0 0 auto"></div>
+  <div id="monthly-compare-card" style="flex:0 0 auto"></div>
 </div>
 <div class="shift-records-banner" id="shift-records-banner"></div>
 
@@ -757,6 +758,40 @@ function renderMonthlySummary(monthlyData, monthLabel) {
   </div>`;
 }
 
+function renderMonthlyCompare() {
+  const el = document.getElementById('monthly-compare-card');
+  if (!el) return;
+  const months = [];
+  for (let i = 1; i <= 3; i++) {
+    let m = selMonth - i, y = selYear;
+    if (m < 0) { m += 12; y--; }
+    const prefix = y + '-' + String(m + 1).padStart(2, '0');
+    const mData = PROD_DATA.filter(d => d.date.startsWith(prefix));
+    const m3 = mData.reduce((s, d) => s + d.m3, 0);
+    months.push({ label: MONTH_NAMES[m].slice(0, 3) + ' ' + String(y).slice(2), m3 });
+  }
+  // newest first → months[0] is selMonth-1, months[1] is selMonth-2, months[2] is selMonth-3
+  const rows = months.map((mo, i) => {
+    const prev = months[i + 1];
+    let arrow = '';
+    if (prev && prev.m3 > 0) {
+      const pct = ((mo.m3 - prev.m3) / prev.m3 * 100).toFixed(1);
+      const up = mo.m3 >= prev.m3;
+      arrow = `<span style="color:${up ? '#1a6e2e' : '#C0392B'};font-weight:700;font-size:16px;margin-left:8px">${up ? '▲' : '▼'} ${Math.abs(pct)}%</span>`;
+    }
+    return `<div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:4px 0;${i < 2 ? 'border-bottom:1px solid #f0f0f0' : ''}">
+      <span style="font-size:17px;color:#666;min-width:60px">${mo.label}</span>
+      <span style="font-size:19px;font-weight:700">${mo.m3 > 0 ? mo.m3.toLocaleString('lt-LT') + ' m³' : '—'}</span>
+      ${arrow}
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `<div class="record-card" style="display:flex;flex-direction:column;gap:6px">
+    <div style="font-size:16px;font-weight:900;letter-spacing:2px;color:#555;text-transform:uppercase;margin-bottom:2px">📊 Paskutiniai 3 mėn.</div>
+    ${rows}
+  </div>`;
+}
+
 function renderMonthlyView() {
   const now = new Date();
   const isCurrent = (selYear === now.getFullYear() && selMonth === now.getMonth());
@@ -773,6 +808,7 @@ function renderMonthlyView() {
   renderShiftBarsChart(monthlyData, 'monthly-chart', 'monthly-legend', isCurrent);
   const monthLabel = MONTH_NAMES[selMonth] + ' ' + selYear;
   renderMonthlySummary(monthlyData, monthLabel);
+  renderMonthlyCompare();
 }
 
 function navMonth(dir) {
