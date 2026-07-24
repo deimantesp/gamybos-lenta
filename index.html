@@ -726,7 +726,7 @@ function renderMonthlySummary(monthlyData, monthLabel) {
   const totalRaw = monthlyData.reduce((s, d) => s + (d.raw || 0), 0);
 
   el.innerHTML = `<div class="record-card" style="display:flex;flex-direction:column;gap:8px;align-self:stretch">
-    <div style="font-size:20px;font-weight:800;line-height:1.3">
+    <div style="font-size:20px;font-weight:800;line-height:1.3;text-align:center">
       📦 Mėnesio gamyba · ${monthLabel}<br>
       <span style="font-size:22px;color:#1a6e2e">${totalM3.toLocaleString('lt-LT')} m³</span>
     </div>
