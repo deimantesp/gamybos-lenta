@@ -361,7 +361,6 @@ body {
 
 <div class="section yearly-section" style="margin-top:1.25rem;">
   <h2 class="section-title" id="yearly-title">Metinis vaizdas</h2>
-  <div class="rank-grid" id="yearly-cards"></div>
   <div class="chart-legend" id="yearly-legend"></div>
   <div class="chart-wrap" style="height:260px;"><canvas id="yearly-chart"></canvas></div>
 </div>
@@ -601,25 +600,15 @@ function renderYearlyChart(data, canvasId, legendId) {
   const months = [...new Set(data.map(d => d.date.substring(0, 7)))].sort();
   const labels  = months.map(m => MONTH_SHORT[parseInt(m.split('-')[1]) - 1]);
 
-  // Kiekvienam mėnesiui — pamainos surūšiuotos pagal m³ didėjančiai (mažiausia apačioje)
-  const monthSorted = months.map(month =>
-    [1, 2, 3, 4]
-      .map(s => ({
-        shift: s,
-        m3: +data.filter(d => d.shift === s && d.date.startsWith(month))
-                 .reduce((a, b) => a + b.m3, 0).toFixed(1),
-      }))
-      .sort((a, b) => a.m3 - b.m3)   // mažiausia [0], didžiausia [3]
-  );
-
-  // 4 "rango" datasets — kiekvienas = viena pozicija stulpelyje (apačia→viršus)
-  const datasets = [0, 1, 2, 3].map(rank => ({
-    label: 'rank' + rank,
-    data:            monthSorted.map(s => s[rank]?.m3 || 0),
-    backgroundColor: monthSorted.map(s => SHIFT_COLORS[(s[rank]?.shift || 1) - 1].bg),
-    borderColor:     monthSorted.map(s => SHIFT_COLORS[(s[rank]?.shift || 1) - 1].border),
-    borderWidth: 1,
-  }));
+  // Kiekvienam mėnesiui — tik aktyviausia pamaina (daugiausiai m³)
+  const topShifts = months.map(month => {
+    const byShift = [1, 2, 3, 4].map(s => ({
+      shift: s,
+      m3: +data.filter(d => d.shift === s && d.date.startsWith(month))
+               .reduce((a, b) => a + b.m3, 0).toFixed(1),
+    }));
+    return byShift.reduce((best, cur) => cur.m3 > best.m3 ? cur : best, { shift: 1, m3: 0 });
+  });
 
   document.getElementById(legendId).innerHTML =
     [1, 2, 3, 4].map((s, i) =>
@@ -630,7 +619,16 @@ function renderYearlyChart(data, canvasId, legendId) {
   const _yex = Chart.getChart(_yc); if (_yex) _yex.destroy();
   new Chart(_yc, {
     type: 'bar',
-    data: { labels, datasets },
+    data: {
+      labels,
+      datasets: [{
+        data:            topShifts.map(s => s.m3),
+        backgroundColor: topShifts.map(s => SHIFT_COLORS[s.shift - 1].bg),
+        borderColor:     topShifts.map(s => SHIFT_COLORS[s.shift - 1].border),
+        borderWidth: 1,
+        borderRadius: 3,
+      }],
+    },
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -639,24 +637,15 @@ function renderYearlyChart(data, canvasId, legendId) {
         tooltip: {
           callbacks: {
             label: ctx => {
-              const s = monthSorted[ctx.dataIndex]?.[ctx.datasetIndex];
-              return s ? ` ${s.shift} pamaina: ${s.m3.toLocaleString('lt-LT')} m³` : '';
+              const s = topShifts[ctx.dataIndex];
+              return ` ${s.shift} pamaina: ${s.m3.toLocaleString('lt-LT')} m³`;
             },
           },
         },
       },
       scales: {
-        x: {
-          stacked: true,
-          ticks: { font: { size: 12, family: "'Montserrat', sans-serif" } },
-          grid: { display: false },
-        },
-        y: {
-          stacked: true,
-          min: 0,
-          ticks: { font: { size: 11, family: "'Montserrat', sans-serif" } },
-          grid: { color: 'rgba(0,0,0,0.04)' },
-        },
+        x: { ticks: { font: { size: 12, family: "'Montserrat', sans-serif" } }, grid: { display: false } },
+        y: { min: 0, ticks: { font: { size: 11, family: "'Montserrat', sans-serif" } }, grid: { color: 'rgba(0,0,0,0.04)' } },
       },
     },
   });
@@ -824,12 +813,10 @@ function init(data) {
   renderMonthlyView();
 
   // Metinis vaizdas
-  const yearStart   = toDateStr(new Date(now.getFullYear(), 0, 1));
-  const yearlyData  = filterRange(data, yearStart, todayStr);
-  const yearlyStats = buildStats(yearlyData, data);
+  const yearStart  = toDateStr(new Date(now.getFullYear(), 0, 1));
+  const yearlyData = filterRange(data, yearStart, todayStr);
   document.getElementById('yearly-title').textContent =
-    now.getFullYear() + ' m. — metinis vaizdas';
-  renderCards(yearlyStats, 'yearly-cards');
+    now.getFullYear() + ' m. — aktyviausia pamaina per mėnesį';
   renderYearlyChart(yearlyData, 'yearly-chart', 'yearly-legend');
 
   document.getElementById('status-bar').textContent =
