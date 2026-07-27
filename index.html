@@ -68,7 +68,7 @@ body {
 }
 .mv-nav { background: #f2f2f7; border: none; border-radius: 8px; width: 34px; height: 34px; font-size: 23px; font-weight: 700; cursor: pointer; color:#000; line-height: 1; }
 .mv-nav:hover { background: #e5e5ea; }
-.mv-sel { font-family: 'Montserrat', sans-serif; font-size: 19px; font-weight: 800; color: #0A2342; background: #f2f2f7; border: 1px solid #e5e5ea; border-radius: 8px; padding: 6px 10px; cursor: pointer; outline: none; }
+.mv-sel { font-family: 'Montserrat', sans-serif; font-size: 19px; font-weight: 800; color: #0A0A0A; background: #f2f2f7; border: 1px solid #e5e5ea; border-radius: 8px; padding: 6px 10px; cursor: pointer; outline: none; }
 .rank-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -107,7 +107,7 @@ body {
 .rank-badge[data-rank="1"] { background: #FEF3DA; color: #7A4A00; }
 .rank-badge[data-rank="2"] { background: #EFEFEF; color:#111; }
 .rank-badge[data-rank="3"] { background: #FBE8E4; color: #7A2010; }
-.rank-badge[data-rank="4"] { background: #E3EEF8; color: #1A4F80; }
+.rank-badge[data-rank="4"] { background: #E3EEF8; color: #5C7C28; }
 .card-medal { font-size: 28px; line-height: 1; }
 .card-name { font-size: 20px; font-weight: 700; margin: 3px 0 1px; }
 .card-total {
@@ -284,8 +284,8 @@ body {
 .auth-box h2 { font-size:22px;font-weight:900;margin:0 0 6px; }
 .auth-box p { font-size:14px;color:#666;margin:0 0 18px; }
 .auth-box input { width:100%;font-family:inherit;font-size:16px;padding:12px 14px;border:1.5px solid #ddd;border-radius:10px;outline:none;margin-bottom:12px;box-sizing:border-box; }
-.auth-box input:focus { border-color:#1a6e2e; }
-.auth-box button { width:100%;font-family:inherit;font-size:16px;font-weight:700;padding:12px;border:none;border-radius:10px;background:#1a6e2e;color:#fff;cursor:pointer; }
+.auth-box input:focus { border-color:#5C7C28; }
+.auth-box button { width:100%;font-family:inherit;font-size:16px;font-weight:700;padding:12px;border:none;border-radius:10px;background:#5C7C28;color:#fff;cursor:pointer; }
 .auth-box button:hover { background:#155824; }
 #auth-err { font-size:13px;color:#C0392B;font-weight:600;min-height:18px;margin-top:10px; }
 </style>
@@ -329,7 +329,7 @@ body {
       style="width:100%;padding:10px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:19px;margin-bottom:1rem;font-family:inherit">
     <div style="display:flex;gap:0.6rem;justify-content:center">
       <button onclick="closeTokenDlg()" style="flex:1;padding:10px;border:1.5px solid #ddd;border-radius:10px;background:#fff;font-size:18px;cursor:pointer">Atšaukti</button>
-      <button onclick="saveToken()" style="flex:1;padding:10px;border:none;border-radius:10px;background:#0A2342;color:#fff;font-size:18px;font-weight:700;cursor:pointer">Išsaugoti</button>
+      <button onclick="saveToken()" style="flex:1;padding:10px;border:none;border-radius:10px;background:#0A0A0A;color:#fff;font-size:18px;font-weight:700;cursor:pointer">Išsaugoti</button>
     </div>
     <div id="token-status" style="margin-top:0.6rem;font-size:15px;color:#1A7A4A;min-height:16px"></div>
   </div>
@@ -751,7 +751,7 @@ function renderMonthlySummary(monthlyData, monthLabel) {
   el.innerHTML = `<div class="record-card" style="display:flex;flex-direction:column;gap:8px;align-self:stretch">
     <div style="font-size:20px;font-weight:800;line-height:1.3;text-align:center">
       📦 Mėnesio gamyba · ${monthLabel}<br>
-      <span style="font-size:22px;color:#1a6e2e">${totalM3.toLocaleString('lt-LT')} m³</span>
+      <span style="font-size:22px;color:#5C7C28">${totalM3.toLocaleString('lt-LT')} m³</span>
     </div>
     ${prdRows ? `<table style="border-collapse:collapse;font-size:20px;line-height:1.7">${prdRows}</table>` : ''}
   </div>`;
@@ -776,7 +776,7 @@ function renderMonthlyCompare() {
     if (prev && prev.m3 > 0) {
       const pct = ((mo.m3 - prev.m3) / prev.m3 * 100).toFixed(1);
       const up = mo.m3 >= prev.m3;
-      arrow = `<span style="color:${up ? '#1a6e2e' : '#C0392B'};font-weight:700;font-size:16px;margin-left:8px">${up ? '▲' : '▼'} ${Math.abs(pct)}%</span>`;
+      arrow = `<span style="color:${up ? '#5C7C28' : '#C0392B'};font-weight:700;font-size:16px;margin-left:8px">${up ? '▲' : '▼'} ${Math.abs(pct)}%</span>`;
     }
     return `<div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:4px 0;${i < 2 ? 'border-bottom:1px solid #f0f0f0' : ''}">
       <span style="font-size:17px;color:#666;min-width:60px">${mo.label}</span>
