@@ -628,6 +628,27 @@ function renderYearlyChart(data, canvasId, legendId) {
       `<span><span class="legend-dot" style="background:${SHIFT_COLORS[i].bg}"></span>${s} pam.</span>`
     ).join('');
 
+  const barLabelPlugin = {
+    id: 'barLabels',
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      ctx.save();
+      chart.data.datasets.forEach((dataset, i) => {
+        chart.getDatasetMeta(i).data.forEach((bar, idx) => {
+          const val = dataset.data[idx];
+          if (!val) return;
+          const s = topShifts[idx];
+          ctx.fillStyle = SHIFT_COLORS[s.shift - 1].border || '#333';
+          ctx.font = 'bold 10px Montserrat, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(val.toLocaleString('lt-LT'), bar.x, bar.y - 2);
+        });
+      });
+      ctx.restore();
+    }
+  };
+
   const _yc = document.getElementById(canvasId);
   const _yex = Chart.getChart(_yc); if (_yex) _yex.destroy();
   new Chart(_yc, {
@@ -642,9 +663,11 @@ function renderYearlyChart(data, canvasId, legendId) {
         borderRadius: 3,
       }],
     },
+    plugins: [barLabelPlugin],
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: { padding: { top: 16 } },
       plugins: {
         legend: { display: false },
         tooltip: {
