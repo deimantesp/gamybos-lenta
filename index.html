@@ -611,14 +611,16 @@ function renderYearlyChart(data, canvasId, legendId) {
   const months = [...new Set(data.map(d => d.date.substring(0, 7)))].sort();
   const labels  = months.map(m => MONTH_SHORT[parseInt(m.split('-')[1]) - 1]);
 
-  // Kiekvienam mėnesiui — tik aktyviausia pamaina (daugiausiai m³)
+  // Kiekvienam mėnesiui — aktyviausia pamaina pagal vid. m³/pamainai
   const topShifts = months.map(month => {
-    const byShift = [1, 2, 3, 4].map(s => ({
-      shift: s,
-      m3: +data.filter(d => d.shift === s && d.date.startsWith(month))
-               .reduce((a, b) => a + b.m3, 0).toFixed(1),
-    }));
-    return byShift.reduce((best, cur) => cur.m3 > best.m3 ? cur : best, { shift: 1, m3: 0 });
+    const byShift = [1, 2, 3, 4].map(s => {
+      const rows = data.filter(d => d.shift === s && d.date.startsWith(month));
+      const sessions = new Set(rows.map(d => d.date)).size;
+      const total = rows.reduce((a, b) => a + b.m3, 0);
+      const avg = sessions > 0 ? +(total / sessions).toFixed(1) : 0;
+      return { shift: s, m3: avg, sessions };
+    });
+    return byShift.reduce((best, cur) => cur.m3 > best.m3 ? cur : best, { shift: 1, m3: 0, sessions: 0 });
   });
 
   document.getElementById(legendId).innerHTML =
@@ -649,7 +651,7 @@ function renderYearlyChart(data, canvasId, legendId) {
           callbacks: {
             label: ctx => {
               const s = topShifts[ctx.dataIndex];
-              return ` ${s.shift} pamaina: ${s.m3.toLocaleString('lt-LT')} m³`;
+              return ` ${s.shift} pamaina: ${s.m3.toLocaleString('lt-LT')} m³/pam. (${s.sessions} pam.)`;
             },
           },
         },
@@ -860,7 +862,7 @@ function init(data) {
   const yearStart  = toDateStr(new Date(now.getFullYear(), 0, 1));
   const yearlyData = filterRange(data, yearStart, todayStr);
   document.getElementById('yearly-title').textContent =
-    now.getFullYear() + ' m. — aktyviausia pamaina per mėnesį';
+    now.getFullYear() + ' m. — aktyviausia pamaina (vid. m³/pam.)';
   renderYearlyChart(yearlyData, 'yearly-chart', 'yearly-legend');
 
   document.getElementById('status-bar').textContent =
