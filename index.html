@@ -378,7 +378,7 @@ body {
   <div class="rank-grid" id="monthly-cards"></div>
   <h2 class="section-title" id="yearly-title">Metinis vaizdas</h2>
   <div class="chart-legend" id="yearly-legend"></div>
-  <div class="chart-wrap" style="height:110px;"><canvas id="yearly-chart"></canvas></div>
+  <div class="chart-wrap" style="height:145px;"><canvas id="yearly-chart"></canvas></div>
 </div>
 
 <div class="section yearly-section" style="margin-top:0.6rem;">
@@ -639,7 +639,7 @@ function renderYearlyChart(data, canvasId, legendId) {
           if (!val) return;
           const s = topShifts[idx];
           ctx.fillStyle = SHIFT_COLORS[s.shift - 1].border || '#333';
-          ctx.font = 'bold 10px Montserrat, sans-serif';
+          ctx.font = 'bold 15px Montserrat, sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'bottom';
           ctx.fillText(val.toLocaleString('lt-LT'), bar.x, bar.y - 2);
