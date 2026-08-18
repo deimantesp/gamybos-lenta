@@ -336,7 +336,7 @@ body {
 </div>
 
 <div style="display:flex;gap:0.5rem;margin-bottom:0.4rem;align-items:flex-start">
-  <div style="display:flex;flex-direction:column;gap:0.4rem;flex:0 0 auto">
+  <div style="display:flex;flex-direction:column;gap:0.4rem;flex:0 0 auto;max-width:38%">
     <div id="pranesimas-banner" onclick="pranesEdit()">
       <div id="pranesimas-label">PRANEŠIMAS</div>
       <div id="pranesimas-body">
@@ -735,7 +735,7 @@ function renderRecords(data) {
 
   let html = '';
   if (maxRec) {
-    html += `<div class="record-card rec-max">
+    html += `<div class="record-card rec-max" style="align-self:flex-start">
       <div class="record-icon">🏆</div>
       <div class="record-body">
         <div class="record-label">Daugiausiai per pamainą · 1 pečius</div>
