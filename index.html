@@ -698,10 +698,9 @@ function computeRecords(data) {
   });
   const arr = Object.values(byShiftDay);
 
-  // Daugiausiai m³ — VIENAS PEČIUS, viena pamaina (iš nesusumuotų eilučių)
-  const rawArr = window.RAW_SHIFT_DATA || arr;
+  // Daugiausiai m³ — visi produktai susumuoti per pamainą
   let maxRec = null;
-  rawArr.forEach(r => { if (r.m3 > 0 && (!maxRec || r.m3 > maxRec.m3)) maxRec = r; });
+  arr.forEach(r => { if (r.m3 > 0 && (!maxRec || r.m3 > maxRec.m3)) maxRec = r; });
 
   // Ekonomiškiausia: didžiausias m³/dujos (tik pilnesnės pamainos, gas>0)
   let ecoRec = null;
@@ -737,7 +736,7 @@ function renderRecords(data) {
     html += `<div class="record-card rec-max" style="align-self:flex-start">
       <div class="record-icon">🏆</div>
       <div class="record-body">
-        <div class="record-label">Daugiausiai per pamainą · 1 pečius</div>
+        <div class="record-label">Daugiausiai per pamainą</div>
         <div class="record-value">${maxRec.m3.toLocaleString('lt-LT')} m³</div>
         <div class="record-meta">${shiftBadge(maxRec.shift)} · ${fmtDate(maxRec.date)}</div>
       </div>
